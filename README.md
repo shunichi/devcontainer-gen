@@ -289,6 +289,24 @@ ports:
 
 追加の apt パッケージ。基本的な開発ツール（git, zsh, vim, ripgrep 等）は自動でインストールされる。
 
+## Firebase エミュレータ（firebase テンプレート）
+
+firebase テンプレートでは、コンテナ起動時に `firebase.json` のエミュレータホストを `0.0.0.0` に書き換えた `firebase.devcontainer.json` を自動生成する（`post_start_extra` で実行）。
+
+`FIREBASE_CONFIG_OPTS` 環境変数が `containerEnv` に設定されるため、`package.json` のスクリプトで以下のように参照すればコンテナ内外で設定を切り替えられる：
+
+```json
+{
+  "scripts": {
+    "emulators:start": "firebase emulators:start $FIREBASE_CONFIG_OPTS -P demo-project"
+  }
+}
+```
+
+コンテナ内では `--config /workspace/firebase.devcontainer.json` が展開され、コンテナ外では変数が未設定のため通常の `firebase.json` が使われる。
+
+`firebase.devcontainer.json` は `.gitignore` に追加しておくこと。
+
 ## ファイアウォール
 
 生成される devcontainer には DNS ベースのネットワーク制限が含まれる。
