@@ -128,6 +128,8 @@ function firebaseTemplate(
     mounts: [
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
       { name: "node-modules", target: "/workspace/node_modules" },
+      { name: "firebase-emulators-cache", target: "/home/node/.cache/firebase/emulators" },
+      { name: "firebase-config", target: "/home/node/.config/configstore" },
     ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
