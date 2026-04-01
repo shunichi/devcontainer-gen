@@ -4,6 +4,12 @@ YAML 設定ファイルから VS Code 用の `.devcontainer/` ディレクトリ
 
 DNS ベースのファイアウォール（iptables + dnsmasq）による通信制限付きの devcontainer 設定を生成する。
 
+## インストール
+
+```bash
+pnpm install -g github:shunichi/devcontainer-gen
+```
+
 ## 使い方
 
 ### 設定 YAML の初期化
@@ -28,17 +34,9 @@ Ruby・Node.js のバージョンは `ruby -v`・`node -v` から自動検出さ
 
 ### devcontainer ファイルの生成
 
-#### 他のプロジェクトから GitHub URL で実行
-
 ```bash
-pnpm dlx github:shunichi/devcontainer-gen devcontainer-gen.yml
-```
-
-#### ローカルで実行
-
-```bash
-pnpm generate devcontainer-gen.yml
-pnpm generate devcontainer-gen.yml -o .devcontainer
+devcontainer-gen devcontainer-gen.yml
+devcontainer-gen devcontainer-gen.yml -o .devcontainer
 ```
 
 ## 生成されるファイル
