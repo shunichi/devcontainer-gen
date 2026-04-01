@@ -85,6 +85,7 @@ function nodeTemplate(
       user: "node",
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
+      editor: "code",
     },
     languages: {
       node: {
@@ -129,6 +130,7 @@ function firebaseTemplate(
       user: "node",
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
+      editor: "code",
     },
     languages: {
       node: {
@@ -206,6 +208,7 @@ function railsTemplate(
       user: "dev",
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
+      editor: "code",
     },
     languages: {
       ruby: { version: rubyVersion },

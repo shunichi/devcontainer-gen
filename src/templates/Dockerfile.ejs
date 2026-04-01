@@ -95,8 +95,8 @@ ENV PATH=$PATH:/usr/local/share/npm-global/bin:/home/<%- container.user %>/.loca
 ENV SHELL=/bin/zsh
 
 # Set the default editor and visual
-ENV EDITOR=nano
-ENV VISUAL=nano
+ENV EDITOR=<%- container.editor ?? 'code' %>
+ENV VISUAL=<%- container.editor ?? 'code' %>
 
 # Default powerline10k theme
 ARG ZSH_IN_DOCKER_VERSION=<%- tools?.zsh_in_docker ?? '1.2.0' %>

@@ -6,6 +6,7 @@ export interface ContainerConfig {
   user: string;
   timezone?: string;
   firewall_mode?: "restrict" | "observe";
+  editor?: string;
 }
 
 export interface NodeLanguageConfig {

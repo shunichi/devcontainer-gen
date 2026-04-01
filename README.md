@@ -164,6 +164,7 @@ dockerfile:
 | `user` | Yes | - | コンテナ内のユーザー名。Node ベースなら `node`、Ruby ベースなら `dev` 等 |
 | `timezone` | No | `Asia/Tokyo` | タイムゾーン |
 | `firewall_mode` | No | `restrict` | `restrict`（許可ドメインのみ）または `observe`（全通信をログ） |
+| `editor` | No | `code` | `EDITOR` / `VISUAL` 環境変数に設定するエディタ |
 
 ### languages
 

@@ -33,6 +33,7 @@ function applyDefaults(config: DevcontainerConfig): DevcontainerConfig {
     container: {
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
+      editor: "code",
       ...config.container,
     },
     tools: {
