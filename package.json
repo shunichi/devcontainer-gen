@@ -4,9 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "bin": {
-    "devcontainer-gen": "src/cli.ts"
+    "devcontainer-gen": "bin/devcontainer-gen.mjs"
   },
   "files": [
+    "bin",
     "src"
   ],
   "engines": {

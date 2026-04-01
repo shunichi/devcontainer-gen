@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 import { generate } from "./generator.js";
 import { init, type TemplateName } from "./init.js";
 
