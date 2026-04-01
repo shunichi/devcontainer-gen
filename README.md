@@ -6,13 +6,35 @@ DNS ベースのファイアウォール（iptables + dnsmasq）による通信�
 
 ## 使い方
 
-### 他のプロジェクトから GitHub URL で実行
+### 設定 YAML の初期化
+
+テンプレートから設定 YAML を生成する。`node`, `firebase`, `rails` の3種類を用意。
+
+```bash
+devcontainer-gen init -t node                # Node.js プロジェクト
+devcontainer-gen init -t firebase            # Firebase プロジェクト
+devcontainer-gen init -t rails               # Rails + Node.js プロジェクト
+devcontainer-gen init -t node -n my-app      # プロジェクト名を指定
+devcontainer-gen init -t node -o config.yml  # 出力ファイルを指定
+```
+
+| オプション | 短縮 | デフォルト | 説明 |
+|---|---|---|---|
+| `--template` | `-t` | (必須) | `node`, `firebase`, `rails` |
+| `--name` | `-n` | カレントディレクトリ名 | プロジェクト名 |
+| `--output` | `-o` | `devcontainer-gen.yml` | 出力ファイルパス |
+
+Ruby・Node.js のバージョンは `ruby -v`・`node -v` から自動検出される。コマンドが見つからない場合はデフォルト値が使われる。
+
+### devcontainer ファイルの生成
+
+#### 他のプロジェクトから GitHub URL で実行
 
 ```bash
 pnpm dlx github:shunichi/devcontainer-gen devcontainer-gen.yml
 ```
 
-### ローカルで実行
+#### ローカルで実行
 
 ```bash
 pnpm generate devcontainer-gen.yml
