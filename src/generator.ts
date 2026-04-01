@@ -16,7 +16,6 @@ const TEMPLATE_FILES = [
   { template: "allowed-domains.conf.ejs", output: "allowed-domains.conf" },
   { template: "dnsmasq.conf.ejs", output: "dnsmasq.conf" },
   { template: "dnsmasq-observe.conf.ejs", output: "dnsmasq-observe.conf" },
-  { template: "init-firewall.sh.ejs", output: "init-firewall.sh" },
   { template: "initialize.sh.ejs", output: "initialize.sh" },
   { template: "post-start.sh.ejs", output: "post-start.sh" },
   {
@@ -36,7 +35,7 @@ const COMPOSE_TEMPLATE = {
 };
 
 /** 静的コピーするファイル */
-const STATIC_FILES = ["test-firewall.sh"];
+const STATIC_FILES = ["init-firewall.sh", "test-firewall.sh"];
 
 /** 実行権限を付与するファイル */
 const EXECUTABLE_FILES = [

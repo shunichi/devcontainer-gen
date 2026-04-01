@@ -41,7 +41,7 @@ else
   dnsmasq --conf-file="${CONF_DIR}/dnsmasq-observe.conf"
 fi
 
-# Make log readable by dev user (dnsmasq runs as nobody)
+# Make log readable by container user (dnsmasq runs as nobody)
 chmod 644 /var/log/dnsmasq.log
 
 # Route all DNS through local dnsmasq (keep Docker embedded DNS as fallback for service names)
@@ -64,7 +64,7 @@ iptables -P OUTPUT DROP
 iptables -A INPUT -i lo -j ACCEPT
 iptables -A OUTPUT -o lo -j ACCEPT
 
-# Allow Docker internal network (db, redis services)
+# Allow Docker internal network
 iptables -A OUTPUT -d 172.16.0.0/12 -j ACCEPT
 iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
 
@@ -80,7 +80,7 @@ iptables -A OUTPUT -p tcp --dport 53 -m owner --uid-owner nobody -j ACCEPT
 iptables -A OUTPUT -p udp --dport 53 -d 127.0.0.1 -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 53 -d 127.0.0.1 -j ACCEPT
 
-# Allow Docker embedded DNS (for service name resolution: db, redis)
+# Allow Docker embedded DNS (for service name resolution)
 iptables -A OUTPUT -p udp --dport 53 -d 127.0.0.11 -j ACCEPT
 iptables -A OUTPUT -p tcp --dport 53 -d 127.0.0.11 -j ACCEPT
 
