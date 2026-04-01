@@ -51,7 +51,6 @@
 <% } %>
   ],
   "containerEnv": {
-    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first",
     "CLAUDE_CONFIG_DIR": "/home/<%- container.user %>/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
     "HISTFILE": "/commandhistory/.zsh_history"<% if (container_env && Object.keys(container_env).length > 0) { %>,

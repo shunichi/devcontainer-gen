@@ -60,6 +60,7 @@ mounts:
     target: /workspace/vendor/bundle
 
 container_env:
+  NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first"
   DATABASE_CONFIG: config/database.devcontainer.yml
   REDIS_URL: redis://redis:6379/1
 

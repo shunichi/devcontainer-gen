@@ -212,7 +212,7 @@ mounts:
 
 ### container_env
 
-追加の環境変数。`NODE_OPTIONS`, `CLAUDE_CONFIG_DIR`, `POWERLEVEL9K_DISABLE_GITSTATUS`, `HISTFILE` は自動で設定される。
+追加の環境変数。`CLAUDE_CONFIG_DIR`, `POWERLEVEL9K_DISABLE_GITSTATUS`, `HISTFILE` は自動で設定される。`NODE_OPTIONS` 等もここで指定する。
 
 ### allowed_domains
 
