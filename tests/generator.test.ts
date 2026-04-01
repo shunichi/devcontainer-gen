@@ -15,7 +15,7 @@ function getReferenceFiles(projectType: string): string[] {
     .filter((f) => fs.statSync(path.join(dir, f)).isFile());
 }
 
-describe.each(["firebase", "rails"])("generate %s", (projectType) => {
+describe.each(["firebase", "node", "rails"])("generate %s", (projectType) => {
   const configPath = path.join(FIXTURES_DIR, `${projectType}.yml`);
   const outputDir = path.join(
     os.tmpdir(),

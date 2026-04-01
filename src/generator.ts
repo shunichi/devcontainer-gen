@@ -4,7 +4,10 @@ import ejs from "ejs";
 import { loadConfig } from "./config.js";
 import type { TemplateContext } from "./types.js";
 
-const TEMPLATES_DIR = path.join(import.meta.dirname, "templates");
+// tsx 実行時: src/templates, ビルド後: dist/ の1つ上の src/templates
+const TEMPLATES_DIR = fs.existsSync(path.join(import.meta.dirname, "templates"))
+  ? path.join(import.meta.dirname, "templates")
+  : path.join(import.meta.dirname, "..", "src", "templates");
 
 /** テンプレートファイルと出力ファイルのマッピング */
 const TEMPLATE_FILES = [

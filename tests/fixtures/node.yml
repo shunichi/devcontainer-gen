@@ -1,0 +1,48 @@
+project:
+  name: my-node-app
+
+container:
+  user: node
+  timezone: Asia/Tokyo
+  firewall_mode: restrict
+
+languages:
+  node:
+    version: "22"
+    package_manager: pnpm
+    pnpm_version: "10.30.0"
+
+tools:
+  claude_code: latest
+  git_delta: "0.18.2"
+  zsh_in_docker: "1.2.0"
+
+vscode:
+  extensions:
+    - anthropic.claude-code
+    - biomejs.biome
+    - eamodio.gitlens
+  settings:
+    editor.defaultFormatter: biomejs.biome
+    editor.formatOnSave: true
+    terminal.integrated.defaultProfile.linux: zsh
+    debug.javascript.autoAttachFilter: disabled
+
+mounts:
+  - name: pnpm-store
+    target: /workspace/.pnpm-store
+  - name: node-modules
+    target: /workspace/node_modules
+
+ports:
+  - port: 3000
+    label: "Dev Server"
+    on_auto_forward: notify
+
+lifecycle:
+  post_create: "pnpm install"
+
+dockerfile:
+  pre_create_dirs:
+    - .pnpm-store
+    - node_modules
