@@ -131,6 +131,7 @@ function firebaseTemplate(
     ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
+      FIREBASE_CONFIG_OPTS: "--config /workspace/firebase.devcontainer.json",
     },
     allowed_domains: [
       {
@@ -151,9 +152,17 @@ function firebaseTemplate(
     ports: [
       { port: 3000, label: "Dev Server", on_auto_forward: "notify" },
       { port: 4000, label: "Firebase Emulator UI", on_auto_forward: "notify" },
+      { port: 5100, label: "Functions Emulator", on_auto_forward: "silent" },
+      { port: 54400, label: "Emulator Hub", on_auto_forward: "silent" },
+      { port: 55002, label: "Hosting Emulator", on_auto_forward: "silent" },
+      { port: 58080, label: "Firestore Emulator", on_auto_forward: "silent" },
+      { port: 59099, label: "Auth Emulator", on_auto_forward: "silent" },
+      { port: 59499, label: "Tasks Emulator", on_auto_forward: "silent" },
     ],
     lifecycle: {
       post_create: "pnpm install",
+      post_start_extra:
+        'jq \'(.emulators[].host) = "0.0.0.0"\' firebase.json > firebase.devcontainer.json',
     },
     dockerfile: {
       pre_create_dirs: [".pnpm-store", "node_modules"],
