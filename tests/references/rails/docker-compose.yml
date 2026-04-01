@@ -1,0 +1,45 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        TZ: ${TZ:-Asia/Tokyo}
+        CLAUDE_CODE_VERSION: latest
+        GIT_DELTA_VERSION: "0.18.2"
+        ZSH_IN_DOCKER_VERSION: "1.2.0"
+        PNPM_VERSION: "10.32.1"
+        FIREWALL_MODE: restrict  # observe に変更してリビルドでドメイン調査モード
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    ports:
+      - "127.0.0.1:2222:22"
+    environment:
+      RUBYOPT: "-EUTF-8"
+    command: sleep infinity
+    volumes:
+      - ..:/workspace:cached
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    volumes:
+      - my-rails-app-pgdata:/var/lib/postgresql/data
+    ports:
+      - "15432:5432"
+
+  redis:
+    image: redis:7
+    volumes:
+      - my-rails-app-redis-data:/data
+
+volumes:
+  my-rails-app-pgdata:
+    name: my-rails-app-pgdata
+  my-rails-app-redis-data:
+    name: my-rails-app-redis-data

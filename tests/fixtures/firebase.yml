@@ -1,0 +1,123 @@
+project:
+  name: my-firebase-app
+
+container:
+  base_image: "node:22-bookworm"
+  user: node
+  timezone: Asia/Tokyo
+  firewall_mode: restrict
+
+languages:
+  node:
+    version: "22"
+    package_manager: pnpm
+    pnpm_version: "10.30.0"
+
+tools:
+  claude_code: latest
+  git_delta: "0.18.2"
+  zsh_in_docker: "1.2.0"
+  firebase_tools: "13"
+
+system_packages:
+  - default-jre-headless
+
+vscode:
+  extensions:
+    - anthropic.claude-code
+    - biomejs.biome
+    - eamodio.gitlens
+  settings:
+    editor.defaultFormatter: biomejs.biome
+    editor.formatOnSave: true
+    terminal.integrated.defaultProfile.linux: zsh
+    debug.javascript.autoAttachFilter: disabled
+
+mounts:
+  - name: pnpm-store
+    target: /workspace/.pnpm-store
+  - name: node-modules
+    target: /workspace/node_modules
+  - name: functions-node-modules
+    target: /workspace/functions/node_modules
+  - name: frontend-node-modules
+    target: /workspace/frontend/node_modules
+  - name: packages-browser-env-node-modules
+    target: /workspace/packages/browser-env/node_modules
+  - name: packages-shared-node-modules
+    target: /workspace/packages/shared/node_modules
+  - name: firebase-emulators-cache
+    target: /home/node/.cache/firebase/emulators
+  - name: firebase-config
+    target: /home/node/.config/configstore
+
+container_env:
+  LANG: "C.UTF-8"
+  NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first"
+  PUPPETEER_SKIP_DOWNLOAD: "true"
+  FIREBASE_CONFIG_OPTS: "--config /workspace/firebase.devcontainer.json"
+
+allowed_domains:
+  - group: npm
+    domains:
+      - sheetjs.com
+  - group: Firebase / Google
+    domains:
+      - googleapis.com
+      - google.com
+      - firebaseio.com
+      - firebaseapp.com
+      - gstatic.com
+      - googleusercontent.com
+      - cloudfunctions.net
+      - run.app
+      - appspot.com
+  - group: Kintone
+    domains:
+      - cybozu.com
+      - kintone.com
+  - group: "ドキュメント参照用"
+    domains:
+      - vitest.dev
+
+ports:
+  - port: 3000
+    label: "Frontend (Vite)"
+    on_auto_forward: notify
+  - port: 4000
+    label: "Firebase Emulator UI"
+    on_auto_forward: notify
+  - port: 5100
+    label: "Functions Emulator"
+    on_auto_forward: silent
+  - port: 54400
+    label: "Emulator Hub"
+    on_auto_forward: silent
+  - port: 55002
+    label: "Hosting Emulator"
+    on_auto_forward: silent
+  - port: 58080
+    label: "Firestore Emulator"
+    on_auto_forward: silent
+  - port: 59099
+    label: "Auth Emulator"
+    on_auto_forward: silent
+  - port: 59499
+    label: "Tasks Emulator"
+    on_auto_forward: silent
+
+lifecycle:
+  post_create: "pnpm install && pnpm build:packages"
+  post_start_extra: |
+    jq '(.emulators[].host) = "0.0.0.0"' firebase.json > firebase.devcontainer.json
+
+dockerfile:
+  pre_create_dirs:
+    - .pnpm-store
+    - node_modules
+    - functions/node_modules
+    - frontend/node_modules
+    - packages/browser-env/node_modules
+    - packages/shared/node_modules
+  extra_run_commands:
+    - "# Pre-create Firebase emulator cache and config directories for volume mounts\nRUN mkdir -p /home/node/.cache/firebase/emulators /home/node/.config/configstore"

@@ -1,0 +1,48 @@
+{
+  "name": "my-rails-app",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  // NET_ADMIN / NET_RAW are required for init-firewall.sh (set in docker-compose.yml)
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "Shopify.ruby-lsp",
+        "eamodio.gitlens",
+        "KoichiSasada.vscode-rdbg"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "debug.javascript.autoAttachFilter": "disabled"
+      }
+    }
+  },
+  "remoteUser": "dev",
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-zsh-history,target=/commandhistory,type=volume",
+    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/dev/.claude,type=volume",
+    "source=${localWorkspaceFolderBasename}-pnpm-store,target=/workspace/.pnpm-store,type=volume",
+    "source=${localWorkspaceFolderBasename}-node-modules,target=/workspace/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-bundle-cache,target=/usr/local/bundle,type=volume",
+    "source=${localWorkspaceFolderBasename}-vendor-bundle,target=/workspace/vendor/bundle,type=volume"
+
+  ],
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first",
+    "CLAUDE_CONFIG_DIR": "/home/dev/.claude",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "HISTFILE": "/commandhistory/.zsh_history",
+    "DATABASE_CONFIG": "config/database.devcontainer.yml",
+    "REDIS_URL": "redis://redis:6379/1"
+
+  },
+  "initializeCommand": "bash .devcontainer/initialize.sh",
+  "postCreateCommand": "bundle install && pnpm install",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "waitFor": "postStartCommand",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": { "label": "Rails", "onAutoForward": "notify" }
+  }
+}

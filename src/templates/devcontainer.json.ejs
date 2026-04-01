@@ -1,0 +1,80 @@
+{
+  "name": "<%- project.name %>",
+<% if (hasServices) { -%>
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+<% } else { -%>
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:<%- container.timezone %>}",
+      "CLAUDE_CODE_VERSION": "<%- tools?.claude_code ?? 'latest' %>",
+      "GIT_DELTA_VERSION": "<%- tools?.git_delta ?? '0.18.2' %>",
+      "ZSH_IN_DOCKER_VERSION": "<%- tools?.zsh_in_docker ?? '1.2.0' %>",
+<% if (languages?.node?.package_manager === 'pnpm' && languages.node.pnpm_version) { -%>
+      "PNPM_VERSION": "<%- languages.node.pnpm_version %>",
+<% } -%>
+      "FIREWALL_MODE": "<%- container.firewall_mode ?? 'restrict' %>"
+    }
+  },
+<% } -%>
+  // NET_ADMIN / NET_RAW are required for init-firewall.sh<% if (hasServices) { %> (set in docker-compose.yml)<% } %>
+<% if (!hasServices) { -%>
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "-p",
+    "127.0.0.1:2222:22"
+  ],
+<% } -%>
+  "customizations": {
+    "vscode": {
+      "extensions": [
+<% vscode.extensions.forEach((ext, i) => { -%>
+        "<%- ext %>"<%= i < vscode.extensions.length - 1 ? ',' : '' %>
+<% }) -%>
+      ],
+      "settings": {
+<% const settingsEntries = Object.entries(vscode.settings ?? {}); settingsEntries.forEach(([key, val], i) => { -%>
+        "<%- key %>": <%- JSON.stringify(val) %><%= i < settingsEntries.length - 1 ? ',' : '' %>
+<% }) -%>
+      }
+    }
+  },
+  "remoteUser": "<%- container.user %>",
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-zsh-history,target=/commandhistory,type=volume",
+    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/<%- container.user %>/.claude,type=volume"<% if (mounts && mounts.length > 0) { %>,
+<% mounts.forEach((m, i) => { -%>
+    "source=${localWorkspaceFolderBasename}-<%- m.name %>,target=<%- m.target %>,type=volume"<%= i < mounts.length - 1 ? ',' : '' %>
+<% }) -%>
+<% } %>
+  ],
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first",
+    "CLAUDE_CONFIG_DIR": "/home/<%- container.user %>/.claude",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "HISTFILE": "/commandhistory/.zsh_history"<% if (container_env && Object.keys(container_env).length > 0) { %>,
+<% const envEntries = Object.entries(container_env); envEntries.forEach(([key, val], i) => { -%>
+    "<%- key %>": "<%- val %>"<%= i < envEntries.length - 1 ? ',' : '' %>
+<% }) -%>
+<% } %>
+  },
+<% if (!hasServices) { -%>
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+<% } -%>
+  "initializeCommand": "bash .devcontainer/initialize.sh",
+<% if (lifecycle?.post_create) { -%>
+  "postCreateCommand": "<%- lifecycle.post_create %>",
+<% } -%>
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "waitFor": "postStartCommand",
+  "forwardPorts": [<%- (ports ?? []).map(p => p.port).join(', ') %>],
+  "portsAttributes": {
+<% (ports ?? []).forEach((p, i) => { -%>
+    "<%- p.port %>": { "label": "<%- p.label %>", "onAutoForward": "<%- p.on_auto_forward %>" }<%= i < ports.length - 1 ? ',' : '' %>
+<% }) -%>
+  }
+}

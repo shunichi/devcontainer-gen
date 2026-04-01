@@ -1,0 +1,78 @@
+{
+  "name": "my-firebase-app",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "TZ": "${localEnv:TZ:Asia/Tokyo}",
+      "CLAUDE_CODE_VERSION": "latest",
+      "GIT_DELTA_VERSION": "0.18.2",
+      "ZSH_IN_DOCKER_VERSION": "1.2.0",
+      "PNPM_VERSION": "10.30.0",
+      "FIREWALL_MODE": "restrict"
+    }
+  },
+  // NET_ADMIN / NET_RAW are required for init-firewall.sh
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "-p",
+    "127.0.0.1:2222:22"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "biomejs.biome",
+        "eamodio.gitlens"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "biomejs.biome",
+        "editor.formatOnSave": true,
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "debug.javascript.autoAttachFilter": "disabled"
+      }
+    }
+  },
+  "remoteUser": "node",
+  "mounts": [
+    "source=${localWorkspaceFolderBasename}-zsh-history,target=/commandhistory,type=volume",
+    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/node/.claude,type=volume",
+    "source=${localWorkspaceFolderBasename}-pnpm-store,target=/workspace/.pnpm-store,type=volume",
+    "source=${localWorkspaceFolderBasename}-node-modules,target=/workspace/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-functions-node-modules,target=/workspace/functions/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-frontend-node-modules,target=/workspace/frontend/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-packages-browser-env-node-modules,target=/workspace/packages/browser-env/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-packages-shared-node-modules,target=/workspace/packages/shared/node_modules,type=volume",
+    "source=${localWorkspaceFolderBasename}-firebase-emulators-cache,target=/home/node/.cache/firebase/emulators,type=volume",
+    "source=${localWorkspaceFolderBasename}-firebase-config,target=/home/node/.config/configstore,type=volume"
+
+  ],
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first",
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
+    "HISTFILE": "/commandhistory/.zsh_history",
+    "LANG": "C.UTF-8",
+    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first",
+    "PUPPETEER_SKIP_DOWNLOAD": "true",
+    "FIREBASE_CONFIG_OPTS": "--config /workspace/firebase.devcontainer.json"
+
+  },
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
+  "workspaceFolder": "/workspace",
+  "initializeCommand": "bash .devcontainer/initialize.sh",
+  "postCreateCommand": "pnpm install && pnpm build:packages",
+  "postStartCommand": "bash .devcontainer/post-start.sh",
+  "waitFor": "postStartCommand",
+  "forwardPorts": [3000, 4000, 5100, 54400, 55002, 58080, 59099, 59499],
+  "portsAttributes": {
+    "3000": { "label": "Frontend (Vite)", "onAutoForward": "notify" },
+    "4000": { "label": "Firebase Emulator UI", "onAutoForward": "notify" },
+    "5100": { "label": "Functions Emulator", "onAutoForward": "silent" },
+    "54400": { "label": "Emulator Hub", "onAutoForward": "silent" },
+    "55002": { "label": "Hosting Emulator", "onAutoForward": "silent" },
+    "58080": { "label": "Firestore Emulator", "onAutoForward": "silent" },
+    "59099": { "label": "Auth Emulator", "onAutoForward": "silent" },
+    "59499": { "label": "Tasks Emulator", "onAutoForward": "silent" }
+  }
+}
