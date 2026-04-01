@@ -47,7 +47,7 @@ RUN groupadd --gid 1000 $USERNAME \
   && mkdir -p /usr/local/share/npm-global \
   && chown -R $USERNAME:$USERNAME /usr/local/share/npm-global /usr/local/share/zsh
 
-# Persist command history.
+# Persist command history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   && mkdir /commandhistory \
   && touch /commandhistory/.bash_history \

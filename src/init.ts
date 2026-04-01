@@ -22,6 +22,17 @@ export function detectNodeVersion(): string {
   }
 }
 
+export function detectPnpmVersion(): string {
+  try {
+    const output = execSync("pnpm -v", { encoding: "utf-8" }).trim();
+    const match = output.match(/^(\d+\.\d+\.\d+)/);
+    if (match) return match[1];
+  } catch {
+    // pnpm not installed, fall through
+  }
+  return "10";
+}
+
 export function detectRubyVersion(): string {
   try {
     const output = execSync("ruby -v", { encoding: "utf-8" }).trim();
@@ -39,6 +50,7 @@ function resolveProjectName(name?: string): string {
 function nodeTemplate(
   projectName: string,
   nodeVersion: string,
+  pnpmVersion: string,
 ): DevcontainerConfig {
   return {
     project: { name: projectName },
@@ -51,7 +63,7 @@ function nodeTemplate(
       node: {
         version: nodeVersion,
         package_manager: "pnpm",
-        pnpm_version: "10.30.0",
+        pnpm_version: pnpmVersion,
       },
     },
     tools: {
@@ -60,7 +72,15 @@ function nodeTemplate(
     },
     vscode: {
       extensions: ["anthropic.claude-code"],
+      settings: {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "debug.javascript.autoAttachFilter": "disabled",
+      },
     },
+    mounts: [
+      { name: "pnpm-store", target: "/workspace/.pnpm-store" },
+      { name: "node-modules", target: "/workspace/node_modules" },
+    ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
     },
@@ -68,7 +88,7 @@ function nodeTemplate(
       post_create: "pnpm install",
     },
     dockerfile: {
-      pre_create_dirs: ["node_modules"],
+      pre_create_dirs: [".pnpm-store", "node_modules"],
     },
   };
 }
@@ -76,6 +96,7 @@ function nodeTemplate(
 function firebaseTemplate(
   projectName: string,
   nodeVersion: string,
+  pnpmVersion: string,
 ): DevcontainerConfig {
   return {
     project: { name: projectName },
@@ -88,7 +109,7 @@ function firebaseTemplate(
       node: {
         version: nodeVersion,
         package_manager: "pnpm",
-        pnpm_version: "10.30.0",
+        pnpm_version: pnpmVersion,
       },
     },
     tools: {
@@ -99,7 +120,15 @@ function firebaseTemplate(
     system_packages: ["default-jre-headless"],
     vscode: {
       extensions: ["anthropic.claude-code"],
+      settings: {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "debug.javascript.autoAttachFilter": "disabled",
+      },
     },
+    mounts: [
+      { name: "pnpm-store", target: "/workspace/.pnpm-store" },
+      { name: "node-modules", target: "/workspace/node_modules" },
+    ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
     },
@@ -127,7 +156,7 @@ function firebaseTemplate(
       post_create: "pnpm install",
     },
     dockerfile: {
-      pre_create_dirs: ["node_modules"],
+      pre_create_dirs: [".pnpm-store", "node_modules"],
     },
   };
 }
@@ -136,6 +165,7 @@ function railsTemplate(
   projectName: string,
   rubyVersion: string,
   nodeVersion: string,
+  pnpmVersion: string,
 ): DevcontainerConfig {
   return {
     project: { name: projectName },
@@ -149,7 +179,7 @@ function railsTemplate(
       node: {
         version: nodeVersion,
         package_manager: "pnpm",
-        pnpm_version: "10.30.0",
+        pnpm_version: pnpmVersion,
       },
     },
     tools: {
@@ -179,11 +209,19 @@ function railsTemplate(
     },
     vscode: {
       extensions: [
+        "eamodio.gitlens",
         "anthropic.claude-code",
         "Shopify.ruby-lsp",
+        "KoichiSasada.vscode-rdbg",
       ],
+      settings: {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "debug.javascript.autoAttachFilter": "disabled",
+      },
     },
     mounts: [
+      { name: "pnpm-store", target: "/workspace/.pnpm-store" },
+      { name: "node-modules", target: "/workspace/node_modules" },
       { name: "bundle-cache", target: "/usr/local/bundle" },
       { name: "vendor-bundle", target: "/workspace/vendor/bundle" },
     ],
@@ -204,27 +242,28 @@ function railsTemplate(
       post_create: "bundle install && pnpm install",
     },
     dockerfile: {
-      pre_create_dirs: ["node_modules", "vendor/bundle"],
+      pre_create_dirs: [".pnpm-store", "node_modules", "vendor/bundle"],
     },
   };
 }
 
 const TEMPLATE_BUILDERS: Record<
   TemplateName,
-  (projectName: string, nodeVersion: string, rubyVersion: string) => DevcontainerConfig
+  (projectName: string, nodeVersion: string, pnpmVersion: string, rubyVersion: string) => DevcontainerConfig
 > = {
-  node: (name, nodeVer) => nodeTemplate(name, nodeVer),
-  firebase: (name, nodeVer) => firebaseTemplate(name, nodeVer),
-  rails: (name, _nodeVer, rubyVer) => railsTemplate(name, rubyVer, _nodeVer),
+  node: (name, nodeVer, pnpmVer) => nodeTemplate(name, nodeVer, pnpmVer),
+  firebase: (name, nodeVer, pnpmVer) => firebaseTemplate(name, nodeVer, pnpmVer),
+  rails: (name, nodeVer, pnpmVer, rubyVer) => railsTemplate(name, rubyVer, nodeVer, pnpmVer),
 };
 
 export async function init(options: InitOptions): Promise<void> {
   const projectName = resolveProjectName(options.name);
   const nodeVersion = detectNodeVersion();
+  const pnpmVersion = detectPnpmVersion();
   const rubyVersion = options.template === "rails" ? detectRubyVersion() : "";
 
   const builder = TEMPLATE_BUILDERS[options.template];
-  const config = builder(projectName, nodeVersion, rubyVersion);
+  const config = builder(projectName, nodeVersion, pnpmVersion, rubyVersion);
 
   const yamlStr = yaml.dump(config, {
     lineWidth: -1,

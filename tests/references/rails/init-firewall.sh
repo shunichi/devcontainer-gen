@@ -44,7 +44,7 @@ fi
 # Make log readable by dev user (dnsmasq runs as nobody)
 chmod 644 /var/log/dnsmasq.log
 
-# Route all DNS through local dnsmasq
+# Route all DNS through local dnsmasq (keep Docker embedded DNS as fallback for service names)
 echo -e "nameserver 127.0.0.1\nnameserver 127.0.0.11" > /etc/resolv.conf
 
 echo "Initializing firewall..."
