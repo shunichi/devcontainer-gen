@@ -37,12 +37,8 @@ const COMPOSE_TEMPLATE = {
 /** 静的コピーするファイル */
 const STATIC_FILES = ["init-firewall.sh", "test-firewall.sh"];
 
-/** 実行権限を付与するファイル */
+/** 実行権限を付与するファイル（ホスト側で直接実行するもののみ） */
 const EXECUTABLE_FILES = [
-  "init-firewall.sh",
-  "test-firewall.sh",
-  "initialize.sh",
-  "post-start.sh",
   "cleanup-devcontainer-images.sh",
   "cleanup-devcontainer-volumes.sh",
 ];
