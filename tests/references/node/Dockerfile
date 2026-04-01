@@ -92,10 +92,10 @@ RUN npm install -g pnpm@${PNPM_VERSION} \
 # Install Claude Code
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
-# Pre-create node_modules directories so named volume mounts are initialized with node ownership
+# Pre-create directories for named volume mounts (owned by node user)
 RUN mkdir -p \
-  .pnpm-store \
-  node_modules
+  /workspace/.pnpm-store \
+  /workspace/node_modules
 
 # Firewall mode: restrict (default) or observe (for domain discovery)
 ARG FIREWALL_MODE=restrict

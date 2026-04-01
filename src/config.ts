@@ -46,6 +46,7 @@ function applyDefaults(config: DevcontainerConfig): DevcontainerConfig {
     container_env: config.container_env ?? {},
     lifecycle: config.lifecycle ?? {},
     system_packages: config.system_packages ?? [],
+    dockerfile: config.dockerfile ?? {},
   };
 }
 

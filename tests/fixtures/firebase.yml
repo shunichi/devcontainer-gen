@@ -108,14 +108,3 @@ lifecycle:
   post_create: "pnpm install && pnpm build:packages"
   post_start_extra: |
     jq '(.emulators[].host) = "0.0.0.0"' firebase.json > firebase.devcontainer.json
-
-dockerfile:
-  pre_create_dirs:
-    - .pnpm-store
-    - node_modules
-    - functions/node_modules
-    - frontend/node_modules
-    - packages/browser-env/node_modules
-    - packages/shared/node_modules
-  extra_run_commands:
-    - "# Pre-create Firebase emulator cache and config directories for volume mounts\nRUN mkdir -p /home/node/.cache/firebase/emulators /home/node/.config/configstore"

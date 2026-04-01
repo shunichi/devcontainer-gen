@@ -43,8 +43,3 @@ ports:
 
 lifecycle:
   post_create: "pnpm install"
-
-dockerfile:
-  pre_create_dirs:
-    - .pnpm-store
-    - node_modules

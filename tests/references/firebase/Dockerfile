@@ -96,17 +96,16 @@ RUN npm install -g firebase-tools@13
 # Install Claude Code
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
-# Pre-create node_modules directories so named volume mounts are initialized with node ownership
+# Pre-create directories for named volume mounts (owned by node user)
 RUN mkdir -p \
-  .pnpm-store \
-  node_modules \
-  functions/node_modules \
-  frontend/node_modules \
-  packages/browser-env/node_modules \
-  packages/shared/node_modules
-
-# Pre-create Firebase emulator cache and config directories for volume mounts
-RUN mkdir -p /home/node/.cache/firebase/emulators /home/node/.config/configstore
+  /workspace/.pnpm-store \
+  /workspace/node_modules \
+  /workspace/functions/node_modules \
+  /workspace/frontend/node_modules \
+  /workspace/packages/browser-env/node_modules \
+  /workspace/packages/shared/node_modules \
+  /home/node/.cache/firebase/emulators \
+  /home/node/.config/configstore
 
 # Firewall mode: restrict (default) or observe (for domain discovery)
 ARG FIREWALL_MODE=restrict

@@ -124,12 +124,14 @@ RUN npm install -g firebase-tools@<%- tools.firebase_tools %>
 
 # Install Claude Code
 RUN curl -fsSL https://claude.ai/install.sh | bash
-<% if (dockerfile?.pre_create_dirs && dockerfile.pre_create_dirs.length > 0) { -%>
+<% const homeDir = `/home/${container.user}`; -%>
+<% const mountDirs = (mounts ?? []).map(m => m.target).filter(t => t.startsWith('/workspace/') || t.startsWith(homeDir + '/')); -%>
+<% if (mountDirs.length > 0) { -%>
 
-# Pre-create <%- userExists ? `node_modules directories so named volume mounts are initialized with ${container.user} ownership` : `directories for named volume mounts (owned by ${container.user} user)` %>
+# Pre-create directories for named volume mounts (owned by <%- container.user %> user)
 RUN mkdir -p \
-<% dockerfile.pre_create_dirs.forEach((dir, i) => { -%>
-  <%- dir %><%= i < dockerfile.pre_create_dirs.length - 1 ? ' \\' : '' %>
+<% mountDirs.forEach((dir, i) => { -%>
+  <%- dir %><%= i < mountDirs.length - 1 ? ' \\' : '' %>
 <% }) -%>
 <% } -%>
 <% if (dockerfile?.extra_run_commands) { for (const cmd of dockerfile.extra_run_commands) { -%>

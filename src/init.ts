@@ -48,22 +48,15 @@ export function detectPnpmImporters(): string[] {
   }
 }
 
-/** importers のパスから node_modules のマウント設定と pre_create_dirs を生成 */
-function nodeModulesFromImporters(importers: string[]): {
-  mounts: MountConfig[];
-  preCreateDirs: string[];
-} {
-  const mounts: MountConfig[] = [];
-  const preCreateDirs: string[] = [];
-  for (const dir of importers) {
+/** importers のパスから node_modules のマウント設定を生成 */
+function nodeModuleMounts(importers: string[]): MountConfig[] {
+  return importers.map((dir) => {
     const rel = dir === "." ? "" : `${dir}/`;
     const name = dir === "."
       ? "node-modules"
       : `${dir.replace(/\//g, "-")}-node-modules`;
-    mounts.push({ name, target: `/workspace/${rel}node_modules` });
-    preCreateDirs.push(`${rel}node_modules`);
-  }
-  return { mounts, preCreateDirs };
+    return { name, target: `/workspace/${rel}node_modules` };
+  });
 }
 
 export function detectRubyVersion(): string {
@@ -86,7 +79,6 @@ function nodeTemplate(
   pnpmVersion: string,
   importers: string[],
 ): DevcontainerConfig {
-  const nm = nodeModulesFromImporters(importers);
   return {
     project: { name: projectName },
     container: {
@@ -114,16 +106,13 @@ function nodeTemplate(
     },
     mounts: [
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
-      ...nm.mounts,
+      ...nodeModuleMounts(importers),
     ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
     },
     lifecycle: {
       post_create: "pnpm install",
-    },
-    dockerfile: {
-      pre_create_dirs: [".pnpm-store", ...nm.preCreateDirs],
     },
   };
 }
@@ -134,7 +123,6 @@ function firebaseTemplate(
   pnpmVersion: string,
   importers: string[],
 ): DevcontainerConfig {
-  const nm = nodeModulesFromImporters(importers);
   return {
     project: { name: projectName },
     container: {
@@ -164,7 +152,7 @@ function firebaseTemplate(
     },
     mounts: [
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
-      ...nm.mounts,
+      ...nodeModuleMounts(importers),
       { name: "firebase-emulators-cache", target: "/home/node/.cache/firebase/emulators" },
       { name: "firebase-config", target: "/home/node/.config/configstore" },
     ],
@@ -202,9 +190,6 @@ function firebaseTemplate(
       post_create: "pnpm install",
       post_start_extra:
         'jq \'(.emulators[].host) = "0.0.0.0"\' firebase.json > firebase.devcontainer.json',
-    },
-    dockerfile: {
-      pre_create_dirs: [".pnpm-store", ...nm.preCreateDirs],
     },
   };
 }
@@ -288,9 +273,6 @@ function railsTemplate(
     ],
     lifecycle: {
       post_create: "bundle install && pnpm install",
-    },
-    dockerfile: {
-      pre_create_dirs: [".pnpm-store", "node_modules", "vendor/bundle"],
     },
   };
 }

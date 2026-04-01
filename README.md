@@ -282,8 +282,9 @@ ports:
 
 | フィールド | 説明 |
 |---|---|
-| `pre_create_dirs` | ボリュームマウント用に事前作成するディレクトリ |
 | `extra_run_commands` | Dockerfile に追加する RUN コマンド |
+
+`mounts` で `/workspace/` 配下および `/home/<user>/` 配下に指定されたディレクトリは Dockerfile 内で自動的に `mkdir -p` される。
 
 ### system_packages
 

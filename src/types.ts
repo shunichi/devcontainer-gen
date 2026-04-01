@@ -70,7 +70,6 @@ export interface ComposeConfig {
 
 export interface DockerfileConfig {
   extra_run_commands?: string[];
-  pre_create_dirs?: string[];
 }
 
 export interface DevcontainerConfig {

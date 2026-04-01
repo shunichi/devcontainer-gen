@@ -107,9 +107,9 @@ RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Pre-create directories for named volume mounts (owned by dev user)
 RUN mkdir -p \
-  .pnpm-store \
-  node_modules \
-  vendor/bundle
+  /workspace/.pnpm-store \
+  /workspace/node_modules \
+  /workspace/vendor/bundle
 
 # Firewall mode: restrict (default) or observe (for domain discovery)
 ARG FIREWALL_MODE=restrict

@@ -80,9 +80,3 @@ compose:
 
 lifecycle:
   post_create: "bundle install && pnpm install"
-
-dockerfile:
-  pre_create_dirs:
-    - .pnpm-store
-    - node_modules
-    - vendor/bundle
