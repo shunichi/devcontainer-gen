@@ -1,42 +1,29 @@
 project:
   name: devcontainer-gen
-
 container:
   user: node
   timezone: Asia/Tokyo
   firewall_mode: restrict
-
 languages:
   node:
     version: "22"
     package_manager: pnpm
-    pnpm_version: "10.33.0"
-
+    pnpm_version: 10.33.0
 tools:
-  claude_code: latest
-  git_delta: "0.18.2"
-  zsh_in_docker: "1.2.0"
-
+  git_delta: 0.18.2
+  zsh_in_docker: 1.2.0
 vscode:
   extensions:
     - anthropic.claude-code
-    - eamodio.gitlens
   settings:
     terminal.integrated.defaultProfile.linux: zsh
     debug.javascript.autoAttachFilter: disabled
-
 mounts:
   - name: pnpm-store
     target: /workspace/.pnpm-store
   - name: node-modules
     target: /workspace/node_modules
-
-ports: []
-
+container_env:
+  NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first"
 lifecycle:
-  post_create: "pnpm install"
-
-dockerfile:
-  pre_create_dirs:
-    - .pnpm-store
-    - node_modules
+  post_create: pnpm install

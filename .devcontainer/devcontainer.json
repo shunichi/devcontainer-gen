@@ -4,7 +4,6 @@
     "dockerfile": "Dockerfile",
     "args": {
       "TZ": "${localEnv:TZ:Asia/Tokyo}",
-      "CLAUDE_CODE_VERSION": "latest",
       "GIT_DELTA_VERSION": "0.18.2",
       "ZSH_IN_DOCKER_VERSION": "1.2.0",
       "PNPM_VERSION": "10.33.0",
@@ -21,8 +20,7 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "anthropic.claude-code",
-        "eamodio.gitlens"
+        "anthropic.claude-code"
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
@@ -39,10 +37,11 @@
 
   ],
   "containerEnv": {
-    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first",
     "CLAUDE_CONFIG_DIR": "/home/node/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
-    "HISTFILE": "/commandhistory/.zsh_history"
+    "HISTFILE": "/commandhistory/.zsh_history",
+    "NODE_OPTIONS": "--max-old-space-size=4096 --dns-result-order=ipv4first"
+
   },
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=delegated",
   "workspaceFolder": "/workspace",

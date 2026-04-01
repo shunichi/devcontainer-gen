@@ -3,8 +3,6 @@ FROM node:22-bookworm
 ARG TZ
 ENV TZ="$TZ"
 
-ARG CLAUDE_CODE_VERSION=latest
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install basic development tools and iptables/ipset
@@ -39,7 +37,7 @@ RUN mkdir -p /usr/local/share/npm-global && \
 
 ARG USERNAME=node
 
-# Persist bash history.
+# Persist command history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   && mkdir /commandhistory \
   && touch /commandhistory/.bash_history \
@@ -65,7 +63,7 @@ USER node
 
 # Install global packages
 ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH=$PATH:/usr/local/share/npm-global/bin
+ENV PATH=$PATH:/usr/local/share/npm-global/bin:/home/node/.local/bin
 
 # Set the default shell to zsh rather than sh
 ENV SHELL=/bin/zsh
@@ -92,12 +90,12 @@ RUN npm install -g pnpm@${PNPM_VERSION} \
   && pnpm completion zsh > /usr/local/share/zsh/site-functions/_pnpm
 
 # Install Claude Code
-RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
-# Pre-create node_modules directories so named volume mounts are initialized with node ownership
+# Pre-create directories for named volume mounts (owned by node user)
 RUN mkdir -p \
-  .pnpm-store \
-  node_modules
+  /workspace/.pnpm-store \
+  /workspace/node_modules
 
 # Firewall mode: restrict (default) or observe (for domain discovery)
 ARG FIREWALL_MODE=restrict
