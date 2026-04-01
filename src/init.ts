@@ -1,8 +1,8 @@
 import { execSync } from "node:child_process";
 import { basename } from "node:path";
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import yaml from "js-yaml";
-import type { DevcontainerConfig } from "./types.js";
+import type { DevcontainerConfig, MountConfig } from "./types.js";
 
 export type TemplateName = "node" | "firebase" | "rails";
 
@@ -33,6 +33,39 @@ export function detectPnpmVersion(): string {
   return "10";
 }
 
+/** pnpm-lock.yaml の importers からワークスペースパッケージのパスを取得 */
+export function detectPnpmImporters(): string[] {
+  const lockfilePath = "pnpm-lock.yaml";
+  if (!existsSync(lockfilePath)) return ["."];
+  try {
+    const content = readFileSync(lockfilePath, "utf-8");
+    const lockfile = yaml.load(content) as Record<string, unknown>;
+    const importers = lockfile?.importers as Record<string, unknown> | undefined;
+    if (!importers) return ["."];
+    return Object.keys(importers);
+  } catch {
+    return ["."];
+  }
+}
+
+/** importers のパスから node_modules のマウント設定と pre_create_dirs を生成 */
+function nodeModulesFromImporters(importers: string[]): {
+  mounts: MountConfig[];
+  preCreateDirs: string[];
+} {
+  const mounts: MountConfig[] = [];
+  const preCreateDirs: string[] = [];
+  for (const dir of importers) {
+    const rel = dir === "." ? "" : `${dir}/`;
+    const name = dir === "."
+      ? "node-modules"
+      : `${dir.replace(/\//g, "-")}-node-modules`;
+    mounts.push({ name, target: `/workspace/${rel}node_modules` });
+    preCreateDirs.push(`${rel}node_modules`);
+  }
+  return { mounts, preCreateDirs };
+}
+
 export function detectRubyVersion(): string {
   try {
     const output = execSync("ruby -v", { encoding: "utf-8" }).trim();
@@ -51,7 +84,9 @@ function nodeTemplate(
   projectName: string,
   nodeVersion: string,
   pnpmVersion: string,
+  importers: string[],
 ): DevcontainerConfig {
+  const nm = nodeModulesFromImporters(importers);
   return {
     project: { name: projectName },
     container: {
@@ -79,7 +114,7 @@ function nodeTemplate(
     },
     mounts: [
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
-      { name: "node-modules", target: "/workspace/node_modules" },
+      ...nm.mounts,
     ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
@@ -88,7 +123,7 @@ function nodeTemplate(
       post_create: "pnpm install",
     },
     dockerfile: {
-      pre_create_dirs: [".pnpm-store", "node_modules"],
+      pre_create_dirs: [".pnpm-store", ...nm.preCreateDirs],
     },
   };
 }
@@ -97,7 +132,9 @@ function firebaseTemplate(
   projectName: string,
   nodeVersion: string,
   pnpmVersion: string,
+  importers: string[],
 ): DevcontainerConfig {
+  const nm = nodeModulesFromImporters(importers);
   return {
     project: { name: projectName },
     container: {
@@ -127,7 +164,7 @@ function firebaseTemplate(
     },
     mounts: [
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
-      { name: "node-modules", target: "/workspace/node_modules" },
+      ...nm.mounts,
       { name: "firebase-emulators-cache", target: "/home/node/.cache/firebase/emulators" },
       { name: "firebase-config", target: "/home/node/.config/configstore" },
     ],
@@ -167,7 +204,7 @@ function firebaseTemplate(
         'jq \'(.emulators[].host) = "0.0.0.0"\' firebase.json > firebase.devcontainer.json',
     },
     dockerfile: {
-      pre_create_dirs: [".pnpm-store", "node_modules"],
+      pre_create_dirs: [".pnpm-store", ...nm.preCreateDirs],
     },
   };
 }
@@ -258,13 +295,21 @@ function railsTemplate(
   };
 }
 
+interface TemplateParams {
+  projectName: string;
+  nodeVersion: string;
+  pnpmVersion: string;
+  rubyVersion: string;
+  importers: string[];
+}
+
 const TEMPLATE_BUILDERS: Record<
   TemplateName,
-  (projectName: string, nodeVersion: string, pnpmVersion: string, rubyVersion: string) => DevcontainerConfig
+  (p: TemplateParams) => DevcontainerConfig
 > = {
-  node: (name, nodeVer, pnpmVer) => nodeTemplate(name, nodeVer, pnpmVer),
-  firebase: (name, nodeVer, pnpmVer) => firebaseTemplate(name, nodeVer, pnpmVer),
-  rails: (name, nodeVer, pnpmVer, rubyVer) => railsTemplate(name, rubyVer, nodeVer, pnpmVer),
+  node: (p) => nodeTemplate(p.projectName, p.nodeVersion, p.pnpmVersion, p.importers),
+  firebase: (p) => firebaseTemplate(p.projectName, p.nodeVersion, p.pnpmVersion, p.importers),
+  rails: (p) => railsTemplate(p.projectName, p.rubyVersion, p.nodeVersion, p.pnpmVersion),
 };
 
 export async function init(options: InitOptions): Promise<void> {
@@ -272,9 +317,12 @@ export async function init(options: InitOptions): Promise<void> {
   const nodeVersion = detectNodeVersion();
   const pnpmVersion = detectPnpmVersion();
   const rubyVersion = options.template === "rails" ? detectRubyVersion() : "";
+  const importers = (options.template === "node" || options.template === "firebase")
+    ? detectPnpmImporters()
+    : ["."];
 
   const builder = TEMPLATE_BUILDERS[options.template];
-  const config = builder(projectName, nodeVersion, pnpmVersion, rubyVersion);
+  const config = builder({ projectName, nodeVersion, pnpmVersion, rubyVersion, importers });
 
   const yamlStr = yaml.dump(config, {
     lineWidth: -1,
