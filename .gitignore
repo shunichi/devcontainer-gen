@@ -1,4 +1,12 @@
 tmp
-node_modules
 dist
+
+node_modules
+.pnpm-store
+
+.claude/.plans
+.claude/settings.local.json
+
+.ssh_authorized_keys
+.tmux.conf
 
