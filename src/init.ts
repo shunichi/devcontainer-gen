@@ -99,7 +99,7 @@ function nodeTemplate(
       zsh_in_docker: "1.2.0",
     },
     vscode: {
-      extensions: ["anthropic.claude-code"],
+      extensions: ["eamodio.gitlens", "anthropic.claude-code"],
       settings: {
         "terminal.integrated.defaultProfile.linux": "zsh",
         "debug.javascript.autoAttachFilter": "disabled",
@@ -146,7 +146,7 @@ function firebaseTemplate(
     },
     system_packages: ["default-jre-headless"],
     vscode: {
-      extensions: ["anthropic.claude-code"],
+      extensions: ["eamodio.gitlens", "anthropic.claude-code"],
       settings: {
         "terminal.integrated.defaultProfile.linux": "zsh",
         "debug.javascript.autoAttachFilter": "disabled",
