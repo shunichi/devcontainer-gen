@@ -4,7 +4,7 @@ import { init, type TemplateName } from "./init.js";
 
 function printUsage(): void {
   console.log(`Usage:
-  devcontainer-gen <config-file> [options]    Generate devcontainer files
+  devcontainer-gen [config-file] [options]    Generate devcontainer files (default: devcontainer-gen.yml)
   devcontainer-gen init [options]             Generate a config YAML
 
 Generate options:
@@ -94,9 +94,7 @@ function parseGenerateArgs(args: string[]): {
   }
 
   if (!configPath) {
-    console.error("Error: config file is required");
-    printUsage();
-    process.exit(1);
+    configPath = "devcontainer-gen.yml";
   }
 
   return { configPath, outputDir };
@@ -104,7 +102,7 @@ function parseGenerateArgs(args: string[]): {
 
 const args = process.argv.slice(2);
 
-if (args.length === 0 || args.includes("-h") || args.includes("--help")) {
+if (args.includes("-h") || args.includes("--help")) {
   printUsage();
   process.exit(0);
 }
