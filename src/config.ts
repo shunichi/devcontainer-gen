@@ -36,7 +36,6 @@ function applyDefaults(config: DevcontainerConfig): DevcontainerConfig {
       ...config.container,
     },
     tools: {
-      claude_code: "latest",
       git_delta: "0.18.2",
       zsh_in_docker: "1.2.0",
       ...config.tools,

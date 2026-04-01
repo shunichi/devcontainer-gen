@@ -24,7 +24,6 @@ export interface LanguagesConfig {
 }
 
 export interface ToolsConfig {
-  claude_code?: string;
   git_delta?: string;
   zsh_in_docker?: string;
   firebase_tools?: string;

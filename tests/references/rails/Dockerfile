@@ -3,8 +3,6 @@ FROM ruby:3.4.5-bookworm
 ARG TZ
 ENV TZ="$TZ"
 
-ARG CLAUDE_CODE_VERSION=latest
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Node.js 22
@@ -105,7 +103,7 @@ RUN npm install -g pnpm@${PNPM_VERSION} \
   && pnpm completion zsh > /usr/local/share/zsh/site-functions/_pnpm
 
 # Install Claude Code
-RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Pre-create directories for named volume mounts (owned by dev user)
 RUN mkdir -p \

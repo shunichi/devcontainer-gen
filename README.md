@@ -168,9 +168,10 @@ dockerfile:
 
 ### tools
 
+Claude Code は `curl -fsSL https://claude.ai/install.sh | bash` で自動インストールされる（バージョン指定不要）。
+
 | フィールド | デフォルト | 説明 |
 |---|---|---|
-| `claude_code` | `latest` | Claude Code のバージョン |
 | `git_delta` | `0.18.2` | git-delta のバージョン |
 | `zsh_in_docker` | `1.2.0` | zsh-in-docker のバージョン |
 | `firebase_tools` | - | Firebase CLI のバージョン（指定時のみインストール） |

@@ -3,8 +3,6 @@ FROM node:22-bookworm
 ARG TZ
 ENV TZ="$TZ"
 
-ARG CLAUDE_CODE_VERSION=latest
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install basic development tools and iptables/ipset
@@ -96,7 +94,7 @@ RUN npm install -g pnpm@${PNPM_VERSION} \
 RUN npm install -g firebase-tools@13
 
 # Install Claude Code
-RUN npm install -g @anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}
+RUN curl -fsSL https://claude.ai/install.sh | bash
 
 # Pre-create node_modules directories so named volume mounts are initialized with node ownership
 RUN mkdir -p \

@@ -4,7 +4,6 @@ services:
       context: .
       args:
         TZ: ${TZ:-Asia/Tokyo}
-        CLAUDE_CODE_VERSION: latest
         GIT_DELTA_VERSION: "0.18.2"
         ZSH_IN_DOCKER_VERSION: "1.2.0"
         PNPM_VERSION: "10.32.1"

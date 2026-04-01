@@ -9,7 +9,6 @@
     "dockerfile": "Dockerfile",
     "args": {
       "TZ": "${localEnv:TZ:<%- container.timezone %>}",
-      "CLAUDE_CODE_VERSION": "<%- tools?.claude_code ?? 'latest' %>",
       "GIT_DELTA_VERSION": "<%- tools?.git_delta ?? '0.18.2' %>",
       "ZSH_IN_DOCKER_VERSION": "<%- tools?.zsh_in_docker ?? '1.2.0' %>",
 <% if (languages?.node?.package_manager === 'pnpm' && languages.node.pnpm_version) { -%>
