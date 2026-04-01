@@ -4,11 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "bin": {
-    "devcontainer-gen": "dist/cli.js"
+    "devcontainer-gen": "src/cli.ts"
   },
   "files": [
-    "dist",
-    "src/templates"
+    "src"
   ],
   "engines": {
     "node": "^22.14.0"
@@ -16,7 +15,6 @@
   "packageManager": "pnpm@10.33.0",
   "scripts": {
     "build": "tsc",
-    "prepare": "tsc",
     "generate": "tsx src/cli.ts",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -28,13 +26,13 @@
   "description": "Generate .devcontainer configuration from YAML",
   "dependencies": {
     "ejs": "^5.0.1",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "tsx": "^4.21.0"
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.19.15",
-    "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vitest": "^4.1.2"
   }
