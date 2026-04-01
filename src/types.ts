@@ -3,9 +3,7 @@ export interface ProjectConfig {
 }
 
 export interface ContainerConfig {
-  base_image: string;
   user: string;
-  user_exists?: boolean;
   timezone?: string;
   firewall_mode?: "restrict" | "observe";
 }
@@ -17,7 +15,7 @@ export interface NodeLanguageConfig {
 }
 
 export interface RubyLanguageConfig {
-  version?: string;
+  version: string;
 }
 
 export interface LanguagesConfig {
@@ -95,6 +93,7 @@ export interface DevcontainerConfig {
 
 /** config.ts で算出するテンプレート用コンテキスト */
 export interface TemplateContext extends DevcontainerConfig {
+  baseImage: string;
   hasServices: boolean;
   serviceNames: string[];
   needsNodeInstall: boolean;

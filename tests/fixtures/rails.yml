@@ -2,7 +2,6 @@ project:
   name: my-rails-app
 
 container:
-  base_image: "ruby:3.4.5-bookworm"
   user: dev
   timezone: Asia/Tokyo
   firewall_mode: restrict

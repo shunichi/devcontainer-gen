@@ -14,11 +14,13 @@ function validate(config: DevcontainerConfig): void {
   if (!config.project?.name) {
     throw new Error("project.name is required");
   }
-  if (!config.container?.base_image) {
-    throw new Error("container.base_image is required");
-  }
   if (!config.container?.user) {
     throw new Error("container.user is required");
+  }
+  if (!config.languages?.node && !config.languages?.ruby) {
+    throw new Error(
+      "At least one of languages.node or languages.ruby is required",
+    );
   }
   if (!config.vscode?.extensions) {
     throw new Error("vscode.extensions is required");
@@ -48,24 +50,35 @@ function applyDefaults(config: DevcontainerConfig): DevcontainerConfig {
   };
 }
 
+/**
+ * languages からベースイメージを決定する。
+ * - Ruby がある場合: ruby:{version}-bookworm（Node は nodesource で追加）
+ * - Node のみの場合: node:{version}-bookworm
+ */
+function resolveBaseImage(config: DevcontainerConfig): string {
+  if (config.languages?.ruby) {
+    return `ruby:${config.languages.ruby.version}-bookworm`;
+  }
+  return `node:${config.languages!.node!.version}-bookworm`;
+}
+
 function buildContext(config: DevcontainerConfig): TemplateContext {
+  const baseImage = resolveBaseImage(config);
+
   const hasServices =
     config.services != null && Object.keys(config.services).length > 0;
   const serviceNames = hasServices ? Object.keys(config.services!) : [];
 
-  // Node.js がベースイメージに含まれるかどうか
-  const baseHasNode = config.container.base_image.startsWith("node:");
-
-  // languages.node があるがベースイメージに Node がない場合、インストールが必要
+  // Ruby ベースの場合、Node は nodesource でインストールが必要
   const needsNodeInstall =
-    config.languages?.node != null && !baseHasNode;
+    config.languages?.ruby != null && config.languages?.node != null;
 
-  // user_exists が明示されていなければベースイメージから推定
-  const userExists =
-    config.container.user_exists ?? baseHasNode;
+  // Node ベースイメージには既存の node ユーザーがある
+  const userExists = !config.languages?.ruby;
 
   return {
     ...config,
+    baseImage,
     hasServices,
     serviceNames,
     needsNodeInstall,
