@@ -28,17 +28,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   aggregate \
   jq \
   nano \
+  ripgrep \
   vim \
+  tmux \
+  openssh-server \
   locales \
   build-essential \
   libpq-dev \
   libvips \
-  ripgrep \
-  tmux \
-  openssh-server \
-  nodejs \
-  && apt-get clean && rm -rf /var/lib/apt/lists/* \
-  && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create dev user (UID 1000)
 ARG USERNAME=dev

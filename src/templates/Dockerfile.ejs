@@ -30,18 +30,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   aggregate \
   jq \
   nano \
+  ripgrep \
   vim \
+  tmux \
+  openssh-server \
 <% if (system_packages) { for (const pkg of system_packages) { -%>
   <%- pkg %> \
 <% } } -%>
-  ripgrep \
-  tmux \
-  openssh-server \
-<% if (needsNodeInstall) { -%>
-  nodejs \
-<% } -%>
-  && apt-get clean && rm -rf /var/lib/apt/lists/*<% if (system_packages?.includes('locales')) { %> \
-  && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen<% } %>
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 <% if (!userExists) { -%>
 # Create <%- container.user %> user (UID 1000)

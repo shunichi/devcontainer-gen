@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   aggregate \
   jq \
   nano \
-  vim \
   ripgrep \
+  vim \
   tmux \
   openssh-server \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
