@@ -31,13 +31,13 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-16:/var/lib/postgresql/data
     ports:
       - "15432:5432"
   redis:
     image: redis:7
     volumes:
-      - redis-data:/data
+      - redis-data-7:/data
 
 vscode:
   extensions:

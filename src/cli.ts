@@ -8,15 +8,17 @@ function printUsage(): void {
   devcontainer-gen init [options]             Generate a config YAML
 
 Generate options:
-  -o, --output-dir <dir>  Output directory (default: .devcontainer)
+  -o, --output-dir <dir>   Output directory (default: .devcontainer)
 
 Init options:
-  -t, --template <type>   Template: node, firebase, rails (required)
-  -n, --name <name>       Project name (default: current directory name)
-  -o, --output <file>     Output file (default: devcontainer-gen.yml)
+  -t, --template <type>    Template: node, firebase, rails (required)
+  -n, --name <name>        Project name (default: current directory name)
+  -o, --output <file>      Output file (default: devcontainer-gen.yml)
+  --postgres <version>     PostgreSQL version (default: 18, rails only)
+  --redis <version>        Redis version (default: 7, rails only)
 
 Common options:
-  -h, --help              Show help`);
+  -h, --help               Show help`);
 }
 
 const VALID_TEMPLATES = ["node", "firebase", "rails"] as const;
@@ -25,10 +27,14 @@ function parseInitArgs(args: string[]): {
   template: TemplateName;
   name?: string;
   output: string;
+  postgresVersion?: string;
+  redisVersion?: string;
 } {
   let template: TemplateName | undefined;
   let name: string | undefined;
   let output = "devcontainer-gen.yml";
+  let postgresVersion: string | undefined;
+  let redisVersion: string | undefined;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -53,6 +59,18 @@ function parseInitArgs(args: string[]): {
         console.error("Error: --output requires a value");
         process.exit(1);
       }
+    } else if (arg === "--postgres") {
+      postgresVersion = args[++i];
+      if (!postgresVersion) {
+        console.error("Error: --postgres requires a value");
+        process.exit(1);
+      }
+    } else if (arg === "--redis") {
+      redisVersion = args[++i];
+      if (!redisVersion) {
+        console.error("Error: --redis requires a value");
+        process.exit(1);
+      }
     } else {
       console.error(`Error: unknown option: ${arg}`);
       printUsage();
@@ -66,7 +84,7 @@ function parseInitArgs(args: string[]): {
     process.exit(1);
   }
 
-  return { template, name, output };
+  return { template, name, output, postgresVersion, redisVersion };
 }
 
 function parseGenerateArgs(args: string[]): {

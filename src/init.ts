@@ -10,6 +10,8 @@ export interface InitOptions {
   template: TemplateName;
   name?: string;
   output: string;
+  postgresVersion?: string;
+  redisVersion?: string;
 }
 
 export function detectNodeVersion(): string {
@@ -201,6 +203,8 @@ function railsTemplate(
   rubyVersion: string,
   nodeVersion: string,
   pnpmVersion: string,
+  postgresVersion: string,
+  redisVersion: string,
 ): DevcontainerConfig {
   return {
     project: { name: projectName },
@@ -230,17 +234,17 @@ function railsTemplate(
     ],
     services: {
       db: {
-        image: "postgres:18",
+        image: `postgres:${postgresVersion}`,
         environment: {
           POSTGRES_USER: "root",
           POSTGRES_PASSWORD: "password",
         },
-        volumes: ["pgdata:/var/lib/postgresql/data"],
+        volumes: [`pgdata-${postgresVersion}:/var/lib/postgresql${parseInt(postgresVersion, 10) >= 18 ? "" : "/data"}`],
         ports: ["15432:5432"],
       },
       redis: {
-        image: "redis:7",
-        volumes: ["redis-data:/data"],
+        image: `redis:${redisVersion}`,
+        volumes: [`redis-data-${redisVersion}:/data`],
       },
     },
     vscode: {
@@ -291,6 +295,8 @@ interface TemplateParams {
   nodeVersion: string;
   pnpmVersion: string;
   rubyVersion: string;
+  postgresVersion: string;
+  redisVersion: string;
   importers: string[];
 }
 
@@ -300,7 +306,7 @@ const TEMPLATE_BUILDERS: Record<
 > = {
   node: (p) => nodeTemplate(p.projectName, p.nodeVersion, p.pnpmVersion, p.importers),
   firebase: (p) => firebaseTemplate(p.projectName, p.nodeVersion, p.pnpmVersion, p.importers),
-  rails: (p) => railsTemplate(p.projectName, p.rubyVersion, p.nodeVersion, p.pnpmVersion),
+  rails: (p) => railsTemplate(p.projectName, p.rubyVersion, p.nodeVersion, p.pnpmVersion, p.postgresVersion, p.redisVersion),
 };
 
 export async function init(options: InitOptions): Promise<void> {
@@ -312,8 +318,11 @@ export async function init(options: InitOptions): Promise<void> {
     ? detectPnpmImporters()
     : ["."];
 
+  const postgresVersion = options.postgresVersion ?? "18";
+  const redisVersion = options.redisVersion ?? "7";
+
   const builder = TEMPLATE_BUILDERS[options.template];
-  const config = builder({ projectName, nodeVersion, pnpmVersion, rubyVersion, importers });
+  const config = builder({ projectName, nodeVersion, pnpmVersion, rubyVersion, postgresVersion, redisVersion, importers });
 
   const yamlStr = yaml.dump(config, {
     lineWidth: -1,

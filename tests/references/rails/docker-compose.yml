@@ -28,17 +28,17 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
     volumes:
-      - my-rails-app-pgdata:/var/lib/postgresql/data
+      - my-rails-app-pgdata-16:/var/lib/postgresql/data
     ports:
       - "15432:5432"
 
   redis:
     image: redis:7
     volumes:
-      - my-rails-app-redis-data:/data
+      - my-rails-app-redis-data-7:/data
 
 volumes:
-  my-rails-app-pgdata:
-    name: my-rails-app-pgdata
-  my-rails-app-redis-data:
-    name: my-rails-app-redis-data
+  my-rails-app-pgdata-16:
+    name: my-rails-app-pgdata-16
+  my-rails-app-redis-data-7:
+    name: my-rails-app-redis-data-7

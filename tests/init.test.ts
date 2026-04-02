@@ -97,5 +97,29 @@ describe("init", () => {
       expect(env.DATABASE_CONFIG).toBe("config/database.devcontainer.yml");
       expect(env.REDIS_URL).toBe("redis://redis:6379/1");
     });
+
+    it("uses default postgres and redis versions", () => {
+      const config = generateToTmp("rails", "rails-app");
+      const services = config.services as Record<string, Record<string, unknown>>;
+      expect(services.db.image).toBe("postgres:18");
+      expect(services.redis.image).toBe("redis:7");
+      expect(services.db.volumes).toContain("pgdata-18:/var/lib/postgresql");
+      expect(services.redis.volumes).toContain("redis-data-7:/data");
+    });
+
+    it("uses custom postgres and redis versions when specified", () => {
+      const output = path.join(
+        os.tmpdir(),
+        `devcontainer-gen-init-test-rails-custom-${Date.now()}.yml`,
+      );
+      init({ template: "rails", name: "rails-app", output, postgresVersion: "16", redisVersion: "8" });
+      const content = fs.readFileSync(output, "utf-8");
+      const config = yaml.load(content) as Record<string, unknown>;
+      const services = config.services as Record<string, Record<string, unknown>>;
+      expect(services.db.image).toBe("postgres:16");
+      expect(services.redis.image).toBe("redis:8");
+      expect(services.db.volumes).toContain("pgdata-16:/var/lib/postgresql/data");
+      expect(services.redis.volumes).toContain("redis-data-8:/data");
+    });
   });
 });
