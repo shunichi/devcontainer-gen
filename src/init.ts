@@ -266,6 +266,12 @@ function railsTemplate(
       DATABASE_CONFIG: "config/database.devcontainer.yml",
       REDIS_URL: "redis://redis:6379/1",
     },
+    allowed_domains: [
+      {
+        group: "CopyTuner",
+        domains: ["copy-tuner.sg-apps.com"],
+      },
+    ],
     compose: {
       app_environment: {
         RUBYOPT: "-EUTF-8",
