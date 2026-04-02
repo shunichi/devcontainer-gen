@@ -227,7 +227,6 @@ function railsTemplate(
       zsh_in_docker: "1.2.0",
     },
     system_packages: [
-      "locales",
       "build-essential",
       "libpq-dev",
       "libvips",
