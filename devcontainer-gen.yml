@@ -4,6 +4,7 @@ container:
   user: node
   timezone: Asia/Tokyo
   firewall_mode: restrict
+  editor: code
 languages:
   node:
     version: "22"
@@ -14,6 +15,7 @@ tools:
   zsh_in_docker: 1.2.0
 vscode:
   extensions:
+    - eamodio.gitlens
     - anthropic.claude-code
   settings:
     terminal.integrated.defaultProfile.linux: zsh
