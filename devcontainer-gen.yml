@@ -26,6 +26,40 @@ mounts:
     target: /workspace/.pnpm-store
   - name: node-modules
     target: /workspace/node_modules
+allowed_domains:
+  - group: npm
+    domains:
+      - npmjs.org
+      - npmjs.com
+  - group: GitHub
+    domains:
+      - github.com
+      - githubusercontent.com
+      - githubassets.com
+  - group: Claude Code
+    domains:
+      - anthropic.com
+      - claude.com
+      - claude.ai
+      - statsig.com
+  - group: GitHub Copilot
+    domains:
+      - githubcopilot.com
+  - group: VS Code 拡張機能
+    domains:
+      - marketplace.visualstudio.com
+      - vscode-cdn.net
+      - vsassets.io
+      - vscode.blob.core.windows.net
+      - update.code.visualstudio.com
+      - azure.cn
+  - group: JSON スキーマ
+    domains:
+      - schemastore.org
+  - group: TLS 証明書失効確認
+    domains:
+      - digicert.com
+      - microsoft.com
 container_env:
   NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first"
 lifecycle:

@@ -56,7 +56,6 @@ export interface PortConfig {
 export interface DomainGroup {
   group: string;
   domains: string[];
-  commented?: boolean;
 }
 
 export interface LifecycleConfig {

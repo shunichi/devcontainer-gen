@@ -2,9 +2,19 @@ import { execSync } from "node:child_process";
 import { basename } from "node:path";
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import yaml from "js-yaml";
-import type { DevcontainerConfig, MountConfig } from "./types.js";
+import type { DevcontainerConfig, DomainGroup, MountConfig } from "./types.js";
 
 export type TemplateName = "node" | "firebase" | "rails";
+
+const COMMON_DOMAINS: DomainGroup[] = [
+  { group: "npm", domains: ["npmjs.org", "npmjs.com"] },
+  { group: "GitHub", domains: ["github.com", "githubusercontent.com", "githubassets.com"] },
+  { group: "Claude Code", domains: ["anthropic.com", "claude.com", "claude.ai", "statsig.com"] },
+  { group: "GitHub Copilot", domains: ["githubcopilot.com"] },
+  { group: "VS Code 拡張機能", domains: ["marketplace.visualstudio.com", "vscode-cdn.net", "vsassets.io", "vscode.blob.core.windows.net", "update.code.visualstudio.com", "azure.cn"] },
+  { group: "JSON スキーマ", domains: ["schemastore.org"] },
+  { group: "TLS 証明書失効確認", domains: ["digicert.com", "microsoft.com"] },
+];
 
 export interface InitOptions {
   template: TemplateName;
@@ -110,6 +120,7 @@ function nodeTemplate(
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
       ...nodeModuleMounts(importers),
     ],
+    allowed_domains: [...COMMON_DOMAINS],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
     },
@@ -163,6 +174,7 @@ function firebaseTemplate(
       FIREBASE_CONFIG_OPTS: "--config /workspace/firebase.devcontainer.json",
     },
     allowed_domains: [
+      ...COMMON_DOMAINS,
       {
         group: "Firebase / Google",
         domains: [
@@ -267,6 +279,8 @@ function railsTemplate(
       REDIS_URL: "redis://redis:6379/1",
     },
     allowed_domains: [
+      { group: "RubyGems", domains: ["rubygems.org"] },
+      ...COMMON_DOMAINS,
       {
         group: "CopyTuner",
         domains: ["copy-tuner.sg-apps.com"],

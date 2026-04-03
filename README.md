@@ -232,16 +232,7 @@ mounts:
 
 ### allowed_domains
 
-プロジェクト固有の許可ドメイン。以下のドメインは自動で含まれる:
-
-- npm (npmjs.org, npmjs.com)
-- GitHub
-- Claude Code
-- GitHub Copilot
-- VS Code 拡張機能
-- JSON スキーマ
-- TLS 証明書失効確認
-- RubyGems（`languages.ruby` 指定時）
+DNS ベースのファイアウォールで許可するドメインのリスト。`init` で生成した YAML には共通ドメイン（npm, GitHub, Claude Code, GitHub Copilot, VS Code 拡張機能, JSON スキーマ, TLS 証明書失効確認）がテンプレートに応じて含まれる。rails テンプレートでは RubyGems も追加される。
 
 ```yaml
 allowed_domains:
