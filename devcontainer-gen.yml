@@ -1,3 +1,4 @@
+# https://github.com/shunichi/devcontainer-gen
 project:
   name: devcontainer-gen
 container:
@@ -19,6 +20,7 @@ vscode:
   settings:
     terminal.integrated.defaultProfile.linux: zsh
     debug.javascript.autoAttachFilter: disabled
+    js/ts.tsdk.path: ./node_modules/typescript/lib
 mounts:
   - name: pnpm-store
     target: /workspace/.pnpm-store

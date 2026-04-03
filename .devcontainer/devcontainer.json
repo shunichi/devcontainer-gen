@@ -25,7 +25,8 @@
       ],
       "settings": {
         "terminal.integrated.defaultProfile.linux": "zsh",
-        "debug.javascript.autoAttachFilter": "disabled"
+        "debug.javascript.autoAttachFilter": "disabled",
+        "js/ts.tsdk.path": "./node_modules/typescript/lib"
       }
     }
   },

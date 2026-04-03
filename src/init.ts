@@ -328,5 +328,6 @@ export async function init(options: InitOptions): Promise<void> {
     sortKeys: false,
   });
 
-  writeFileSync(options.output, yamlStr, "utf-8");
+  const header = "# https://github.com/shunichi/devcontainer-gen\n";
+  writeFileSync(options.output, header + yamlStr, "utf-8");
 }
