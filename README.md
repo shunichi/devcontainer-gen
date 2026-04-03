@@ -22,6 +22,7 @@ devcontainer-gen init -t firebase            # Firebase プロジェクト
 devcontainer-gen init -t rails               # Rails + Node.js プロジェクト
 devcontainer-gen init -t node -n my-app      # プロジェクト名を指定
 devcontainer-gen init -t node -o config.yml  # 出力ファイルを指定
+devcontainer-gen init -t rails --postgres 16 # PostgreSQL バージョンを指定
 ```
 
 | オプション | 短縮 | デフォルト | 説明 |
@@ -29,8 +30,12 @@ devcontainer-gen init -t node -o config.yml  # 出力ファイルを指定
 | `--template` | `-t` | (必須) | `node`, `firebase`, `rails` |
 | `--name` | `-n` | カレントディレクトリ名 | プロジェクト名 |
 | `--output` | `-o` | `devcontainer-gen.yml` | 出力ファイルパス |
+| `--postgres` | - | `18` | PostgreSQL バージョン（rails のみ） |
+| `--redis` | - | `7` | Redis バージョン（rails のみ） |
 
-Ruby・Node.js のバージョンは `ruby -v`・`node -v` から自動検出される。コマンドが見つからない場合はデフォルト値が使われる。
+Ruby・Node.js・pnpm のバージョンは `ruby -v`・`node -v`・`pnpm -v` から自動検出される。コマンドが見つからない場合はデフォルト値が使われる。
+
+`node` と `firebase` テンプレートでは `pnpm-lock.yaml` の `importers` フィールドから pnpm ワークスペースのパッケージを検出し、各パッケージの `node_modules` マウントを自動生成する。
 
 ### devcontainer ファイルの生成
 
@@ -64,14 +69,11 @@ devcontainer-gen devcontainer-gen.yml -o .devcontainer
 project:
   name: my-app
 
-container:
-  user: node
-
 languages:
   node:
     version: "22"
     package_manager: pnpm
-    pnpm_version: "10.30.0"
+    pnpm_version: "10"
 
 vscode:
   extensions:
@@ -79,10 +81,6 @@ vscode:
 
 lifecycle:
   post_create: "pnpm install"
-
-dockerfile:
-  pre_create_dirs:
-    - node_modules
 ```
 
 ### Ruby + Node.js + Docker Compose 構成
@@ -91,42 +89,39 @@ dockerfile:
 project:
   name: my-rails-app
 
-container:
-  user: dev
-
 languages:
   ruby:
     version: "3.4.5"
   node:
     version: "22"
     package_manager: pnpm
-    pnpm_version: "10.32.1"
+    pnpm_version: "10"
 
 system_packages:
-  - locales
   - build-essential
   - libpq-dev
   - libvips
 
 services:
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-18:/var/lib/postgresql
     ports:
       - "15432:5432"
   redis:
     image: redis:7
     volumes:
-      - redis-data:/data
+      - redis-data-7:/data
 
 vscode:
   extensions:
     - anthropic.claude-code
     - Shopify.ruby-lsp
+    - KoichiSasada.vscode-rdbg
 
 mounts:
   - name: bundle-cache
@@ -142,11 +137,6 @@ compose:
 
 lifecycle:
   post_create: "bundle install && pnpm install"
-
-dockerfile:
-  pre_create_dirs:
-    - node_modules
-    - vendor/bundle
 ```
 
 ## 設定リファレンス
@@ -161,7 +151,6 @@ dockerfile:
 
 | フィールド | 必須 | デフォルト | 説明 |
 |---|---|---|---|
-| `user` | Yes | - | コンテナ内のユーザー名。Node ベースなら `node`、Ruby ベースなら `dev` 等 |
 | `timezone` | No | `Asia/Tokyo` | タイムゾーン |
 | `firewall_mode` | No | `restrict` | `restrict`（許可ドメインのみ）または `observe`（全通信をログ） |
 | `editor` | No | `code` | `EDITOR` / `VISUAL` 環境変数に設定するエディタ |
@@ -172,6 +161,8 @@ dockerfile:
 
 - `ruby` 指定あり → `ruby:{version}-bookworm`（Node は nodesource で追加）
 - `node` のみ → `node:{version}-bookworm`
+
+`languages.node` と `languages.ruby` のうち少なくとも一方が必須。
 
 #### languages.node
 
@@ -204,15 +195,17 @@ Docker Compose サービスの定義。指定すると `docker-compose.yml` が�
 ```yaml
 services:
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata-18:/var/lib/postgresql
     ports:
       - "15432:5432"
 ```
+
+PostgreSQL 18 以降はデータディレクトリが `/var/lib/postgresql` に変更されている（17 以前は `/var/lib/postgresql/data`）。
 
 ### vscode
 
@@ -230,6 +223,8 @@ mounts:
   - name: node-modules
     target: /workspace/node_modules
 ```
+
+`/workspace/` 配下および `/home/dev/` 配下にマウントされるディレクトリは Dockerfile 内で自動的に `mkdir -p` される。
 
 ### container_env
 
@@ -283,15 +278,20 @@ ports:
 |---|---|
 | `extra_run_commands` | Dockerfile に追加する RUN コマンド |
 
-`mounts` で `/workspace/` 配下および `/home/<user>/` 配下に指定されたディレクトリは Dockerfile 内で自動的に `mkdir -p` される。
-
 ### system_packages
 
 追加の apt パッケージ。基本的な開発ツール（git, zsh, vim, ripgrep 等）は自動でインストールされる。
 
 ## Firebase エミュレータ（firebase テンプレート）
 
-firebase テンプレートでは、コンテナ起動時に `firebase.json` のエミュレータホストを `0.0.0.0` に書き換えた `firebase.devcontainer.json` を自動生成する（`post_start_extra` で実行）。
+firebase テンプレートでは以下が自動設定される:
+
+- `firebase_tools` のインストール
+- `default-jre-headless` パッケージ（エミュレータ用 JRE）
+- Firebase / Google 関連ドメインの許可
+- エミュレータ用ポート（Emulator UI, Functions, Firestore, Auth 等）
+
+コンテナ起動時に `firebase.json` のエミュレータホストを `0.0.0.0` に書き換えた `firebase.devcontainer.json` を自動生成する（`post_start_extra` で実行）。
 
 `FIREBASE_CONFIG_OPTS` 環境変数が `containerEnv` に設定されるため、`package.json` のスクリプトで以下のように参照すればコンテナ内外で設定を切り替えられる：
 
