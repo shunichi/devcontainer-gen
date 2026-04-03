@@ -84,6 +84,19 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
 
+# Set up VS Code remote CLI for SSH sessions
+RUN cat <<'EOF' >> ~/.zshrc
+
+# VS Code remote CLI (only when not in VS Code integrated terminal)
+if [ -z "$VSCODE_IPC_HOOK_CLI" ]; then
+  VSCODE_CLI_DIR=$(ls -td /vscode/vscode-server/bin/linux-x64/*/bin/remote-cli 2>/dev/null | head -1)
+  if [ -n "$VSCODE_CLI_DIR" ]; then
+    export PATH="$VSCODE_CLI_DIR:$PATH"
+    export VSCODE_IPC_HOOK_CLI=$(ls -t /tmp/vscode-ipc-*.sock 2>/dev/null | head -1)
+  fi
+fi
+EOF
+
 ARG PNPM_VERSION=10.33.0
 
 # Install pnpm and zsh completion
