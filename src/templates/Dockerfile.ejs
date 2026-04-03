@@ -4,6 +4,8 @@ ARG TZ
 ENV TZ="$TZ"
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.utf8
+ENV LC_ALL=C.utf8
 <% if (needsNodeInstall && languages?.node) { -%>
 
 # Install Node.js <%- languages.node.version %>

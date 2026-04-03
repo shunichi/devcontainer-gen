@@ -4,6 +4,8 @@ ARG TZ
 ENV TZ="$TZ"
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.utf8
+ENV LC_ALL=C.utf8
 
 # Install Node.js 22
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
