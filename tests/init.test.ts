@@ -86,11 +86,6 @@ describe("init", () => {
       expect(services.redis).toBeDefined();
     });
 
-    it("sets user to dev", () => {
-      const config = generateToTmp("rails", "rails-app");
-      expect((config.container as Record<string, unknown>).user).toBe("dev");
-    });
-
     it("includes DATABASE_CONFIG and REDIS_URL in container_env", () => {
       const config = generateToTmp("rails", "rails-app");
       const env = config.container_env as Record<string, string>;

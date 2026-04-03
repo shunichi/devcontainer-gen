@@ -32,22 +32,22 @@
       }
     }
   },
-  "remoteUser": "node",
+  "remoteUser": "dev",
   "mounts": [
     "source=${localWorkspaceFolderBasename}-zsh-history,target=/commandhistory,type=volume",
-    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/node/.claude,type=volume",
+    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/dev/.claude,type=volume",
     "source=${localWorkspaceFolderBasename}-pnpm-store,target=/workspace/.pnpm-store,type=volume",
     "source=${localWorkspaceFolderBasename}-node-modules,target=/workspace/node_modules,type=volume",
     "source=${localWorkspaceFolderBasename}-functions-node-modules,target=/workspace/functions/node_modules,type=volume",
     "source=${localWorkspaceFolderBasename}-frontend-node-modules,target=/workspace/frontend/node_modules,type=volume",
     "source=${localWorkspaceFolderBasename}-packages-browser-env-node-modules,target=/workspace/packages/browser-env/node_modules,type=volume",
     "source=${localWorkspaceFolderBasename}-packages-shared-node-modules,target=/workspace/packages/shared/node_modules,type=volume",
-    "source=${localWorkspaceFolderBasename}-firebase-emulators-cache,target=/home/node/.cache/firebase/emulators,type=volume",
-    "source=${localWorkspaceFolderBasename}-firebase-config,target=/home/node/.config/configstore,type=volume"
+    "source=${localWorkspaceFolderBasename}-firebase-emulators-cache,target=/home/dev/.cache/firebase/emulators,type=volume",
+    "source=${localWorkspaceFolderBasename}-firebase-config,target=/home/dev/.config/configstore,type=volume"
 
   ],
   "containerEnv": {
-    "CLAUDE_CONFIG_DIR": "/home/node/.claude",
+    "CLAUDE_CONFIG_DIR": "/home/dev/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
     "HISTFILE": "/commandhistory/.zsh_history",
     "LANG": "C.UTF-8",

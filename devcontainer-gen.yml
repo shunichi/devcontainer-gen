@@ -1,7 +1,6 @@
 project:
   name: devcontainer-gen
 container:
-  user: node
   timezone: Asia/Tokyo
   firewall_mode: restrict
   editor: code

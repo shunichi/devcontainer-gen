@@ -33,11 +33,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   openssh-server \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Ensure default node user has access to /usr/local/share
-RUN mkdir -p /usr/local/share/npm-global && \
-  chown -R node:node /usr/local/share
+# Rename node user to dev
+RUN usermod -l dev -d /home/dev -m node && groupmod -n dev node && \
+  mkdir -p /usr/local/share/npm-global && \
+  chown -R dev:dev /usr/local/share
 
-ARG USERNAME=node
+ARG USERNAME=dev
 
 # Persist command history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
@@ -49,8 +50,8 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 ENV DEVCONTAINER=true
 
 # Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /home/node/.claude && \
-  chown -R node:node /workspace /home/node/.claude
+RUN mkdir -p /workspace /home/dev/.claude && \
+  chown -R dev:dev /workspace /home/dev/.claude
 
 WORKDIR /workspace
 
@@ -61,11 +62,11 @@ RUN ARCH=$(dpkg --print-architecture) && \
   rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
 # Set up non-root user
-USER node
+USER dev
 
 # Install global packages
 ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH=$PATH:/usr/local/share/npm-global/bin:/home/node/.local/bin
+ENV PATH=$PATH:/usr/local/share/npm-global/bin:/home/dev/.local/bin
 
 # Set the default shell to zsh rather than sh
 ENV SHELL=/bin/zsh
@@ -84,6 +85,19 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
 
+# Set up VS Code remote CLI for SSH sessions
+RUN cat <<'EOF' >> ~/.zshrc
+
+# VS Code remote CLI (only when not in VS Code integrated terminal)
+if [ -z "$VSCODE_IPC_HOOK_CLI" ]; then
+  VSCODE_CLI_DIR=$(ls -td /vscode/vscode-server/bin/linux-x64/*/bin/remote-cli 2>/dev/null | head -1)
+  if [ -n "$VSCODE_CLI_DIR" ]; then
+    export PATH="$VSCODE_CLI_DIR:$PATH"
+    export VSCODE_IPC_HOOK_CLI=$(ls -t /tmp/vscode-ipc-*.sock 2>/dev/null | head -1)
+  fi
+fi
+EOF
+
 ARG PNPM_VERSION=10.30.0
 
 # Install pnpm and zsh completion
@@ -94,7 +108,7 @@ RUN npm install -g pnpm@${PNPM_VERSION} \
 # Install Claude Code
 RUN curl -fsSL https://claude.ai/install.sh | bash
 
-# Pre-create directories for named volume mounts (owned by node user)
+# Pre-create directories for named volume mounts (owned by dev user)
 RUN mkdir -p \
   /workspace/.pnpm-store \
   /workspace/node_modules
@@ -107,8 +121,8 @@ ARG FIREWALL_MODE=restrict
 COPY init-firewall.sh test-firewall.sh /usr/local/bin/
 USER root
 RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/test-firewall.sh && \
-  echo "node ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh ${FIREWALL_MODE}, /usr/local/bin/test-firewall.sh, /usr/bin/mkdir -p /run/sshd, /usr/sbin/sshd" > /etc/sudoers.d/node-firewall && \
-  chmod 0440 /etc/sudoers.d/node-firewall && \
+  echo "dev ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh ${FIREWALL_MODE}, /usr/local/bin/test-firewall.sh, /usr/bin/mkdir -p /run/sshd, /usr/sbin/sshd" > /etc/sudoers.d/dev-firewall && \
+  chmod 0440 /etc/sudoers.d/dev-firewall && \
   echo "${FIREWALL_MODE}" > /etc/firewall-mode && chmod 644 /etc/firewall-mode && \
   touch /var/log/dnsmasq.log && chown nobody:nogroup /var/log/dnsmasq.log
-USER node
+USER dev

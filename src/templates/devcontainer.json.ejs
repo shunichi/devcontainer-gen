@@ -41,17 +41,17 @@
       }
     }
   },
-  "remoteUser": "<%- container.user %>",
+  "remoteUser": "dev",
   "mounts": [
     "source=${localWorkspaceFolderBasename}-zsh-history,target=/commandhistory,type=volume",
-    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/<%- container.user %>/.claude,type=volume"<% if (mounts && mounts.length > 0) { %>,
+    "source=${localWorkspaceFolderBasename}-claude-config,target=/home/dev/.claude,type=volume"<% if (mounts && mounts.length > 0) { %>,
 <% mounts.forEach((m, i) => { -%>
     "source=${localWorkspaceFolderBasename}-<%- m.name %>,target=<%- m.target %>,type=volume"<%= i < mounts.length - 1 ? ',' : '' %>
 <% }) -%>
 <% } %>
   ],
   "containerEnv": {
-    "CLAUDE_CONFIG_DIR": "/home/<%- container.user %>/.claude",
+    "CLAUDE_CONFIG_DIR": "/home/dev/.claude",
     "POWERLEVEL9K_DISABLE_GITSTATUS": "true",
     "HISTFILE": "/commandhistory/.zsh_history"<% if (container_env && Object.keys(container_env).length > 0) { %>,
 <% const envEntries = Object.entries(container_env); envEntries.forEach(([key, val], i) => { -%>

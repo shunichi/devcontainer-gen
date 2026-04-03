@@ -14,9 +14,6 @@ function validate(config: DevcontainerConfig): void {
   if (!config.project?.name) {
     throw new Error("project.name is required");
   }
-  if (!config.container?.user) {
-    throw new Error("container.user is required");
-  }
   if (!config.languages?.node && !config.languages?.ruby) {
     throw new Error(
       "At least one of languages.node or languages.ruby is required",
@@ -74,8 +71,8 @@ function buildContext(config: DevcontainerConfig): TemplateContext {
   const needsNodeInstall =
     config.languages?.ruby != null && config.languages?.node != null;
 
-  // Node ベースイメージには既存の node ユーザーがある
-  const userExists = !config.languages?.ruby;
+  // Node ベースイメージには既存の node ユーザー (UID 1000) がある
+  const nodeBaseImage = !config.languages?.ruby;
 
   return {
     ...config,
@@ -83,6 +80,6 @@ function buildContext(config: DevcontainerConfig): TemplateContext {
     hasServices,
     serviceNames,
     needsNodeInstall,
-    userExists,
+    nodeBaseImage,
   };
 }

@@ -2,7 +2,6 @@ project:
   name: my-firebase-app
 
 container:
-  user: node
   timezone: Asia/Tokyo
   firewall_mode: restrict
 
@@ -45,9 +44,9 @@ mounts:
   - name: packages-shared-node-modules
     target: /workspace/packages/shared/node_modules
   - name: firebase-emulators-cache
-    target: /home/node/.cache/firebase/emulators
+    target: /home/dev/.cache/firebase/emulators
   - name: firebase-config
-    target: /home/node/.config/configstore
+    target: /home/dev/.config/configstore
 
 container_env:
   LANG: "C.UTF-8"

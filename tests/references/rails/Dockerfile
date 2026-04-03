@@ -40,11 +40,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Create dev user (UID 1000)
-ARG USERNAME=dev
-RUN groupadd --gid 1000 $USERNAME \
-  && useradd --uid 1000 --gid 1000 -m -s /bin/zsh $USERNAME \
+RUN groupadd --gid 1000 dev \
+  && useradd --uid 1000 --gid 1000 -m -s /bin/zsh dev \
   && mkdir -p /usr/local/share/npm-global \
-  && chown -R $USERNAME:$USERNAME /usr/local/share/npm-global /usr/local/share/zsh
+  && chown -R dev:dev /usr/local/share/npm-global /usr/local/share/zsh
+
+ARG USERNAME=dev
 
 # Persist command history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
@@ -93,6 +94,19 @@ RUN sh -c "$(wget -O- https://github.com/deluan/zsh-in-docker/releases/download/
   -a "source /usr/share/doc/fzf/examples/completion.zsh" \
   -a "export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
   -x
+
+# Set up VS Code remote CLI for SSH sessions
+RUN cat <<'EOF' >> ~/.zshrc
+
+# VS Code remote CLI (only when not in VS Code integrated terminal)
+if [ -z "$VSCODE_IPC_HOOK_CLI" ]; then
+  VSCODE_CLI_DIR=$(ls -td /vscode/vscode-server/bin/linux-x64/*/bin/remote-cli 2>/dev/null | head -1)
+  if [ -n "$VSCODE_CLI_DIR" ]; then
+    export PATH="$VSCODE_CLI_DIR:$PATH"
+    export VSCODE_IPC_HOOK_CLI=$(ls -t /tmp/vscode-ipc-*.sock 2>/dev/null | head -1)
+  fi
+fi
+EOF
 
 ARG PNPM_VERSION=10.32.1
 

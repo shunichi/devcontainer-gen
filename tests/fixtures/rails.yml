@@ -2,7 +2,6 @@ project:
   name: my-rails-app
 
 container:
-  user: dev
   timezone: Asia/Tokyo
   firewall_mode: restrict
 

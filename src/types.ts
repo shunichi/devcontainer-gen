@@ -3,7 +3,6 @@ export interface ProjectConfig {
 }
 
 export interface ContainerConfig {
-  user: string;
   timezone?: string;
   firewall_mode?: "restrict" | "observe";
   editor?: string;
@@ -96,5 +95,5 @@ export interface TemplateContext extends DevcontainerConfig {
   hasServices: boolean;
   serviceNames: string[];
   needsNodeInstall: boolean;
-  userExists: boolean;
+  nodeBaseImage: boolean;
 }

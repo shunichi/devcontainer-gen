@@ -41,20 +41,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 <% } } -%>
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-<% if (!userExists) { -%>
-# Create <%- container.user %> user (UID 1000)
-ARG USERNAME=<%- container.user %>
-RUN groupadd --gid 1000 $USERNAME \
-  && useradd --uid 1000 --gid 1000 -m -s /bin/zsh $USERNAME \
-  && mkdir -p /usr/local/share/npm-global \
-  && chown -R $USERNAME:$USERNAME /usr/local/share/npm-global /usr/local/share/zsh
+<% if (nodeBaseImage) { -%>
+# Rename node user to dev
+RUN usermod -l dev -d /home/dev -m node && groupmod -n dev node && \
+  mkdir -p /usr/local/share/npm-global && \
+  chown -R dev:dev /usr/local/share
 <% } else { -%>
-# Ensure default <%- container.user %> user has access to /usr/local/share
-RUN mkdir -p /usr/local/share/npm-global && \
-  chown -R <%- container.user %>:<%- container.user %> /usr/local/share
-
-ARG USERNAME=<%- container.user %>
+# Create dev user (UID 1000)
+RUN groupadd --gid 1000 dev \
+  && useradd --uid 1000 --gid 1000 -m -s /bin/zsh dev \
+  && mkdir -p /usr/local/share/npm-global \
+  && chown -R dev:dev /usr/local/share/npm-global /usr/local/share/zsh
 <% } -%>
+
+ARG USERNAME=dev
 
 # Persist command history
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
@@ -66,11 +66,11 @@ RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhisto
 ENV DEVCONTAINER=true
 
 # Create workspace and config directories and set permissions
-RUN mkdir -p /workspace /home/<%- container.user %>/.claude && \
-  chown -R <%- container.user %>:<%- container.user %> /workspace /home/<%- container.user %>/.claude
+RUN mkdir -p /workspace /home/dev/.claude && \
+  chown -R dev:dev /workspace /home/dev/.claude
 <% if (languages?.ruby) { -%>
 
-# Allow <%- container.user %> user to write to bundler directory
+# Allow dev user to write to bundler directory
 RUN chown -R $USERNAME:$USERNAME /usr/local/bundle
 <% } -%>
 
@@ -83,11 +83,11 @@ RUN ARCH=$(dpkg --print-architecture) && \
   rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
 # Set up non-root user
-USER <%- container.user %>
+USER dev
 
 # Install global packages
 ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH=$PATH:/usr/local/share/npm-global/bin:/home/<%- container.user %>/.local/bin
+ENV PATH=$PATH:/usr/local/share/npm-global/bin:/home/dev/.local/bin
 
 # Set the default shell to zsh rather than sh
 ENV SHELL=/bin/zsh
@@ -135,11 +135,11 @@ RUN npm install -g firebase-tools@<%- tools.firebase_tools %>
 
 # Install Claude Code
 RUN curl -fsSL https://claude.ai/install.sh | bash
-<% const homeDir = `/home/${container.user}`; -%>
+<% const homeDir = '/home/dev'; -%>
 <% const mountDirs = (mounts ?? []).map(m => m.target).filter(t => t.startsWith('/workspace/') || t.startsWith(homeDir + '/')); -%>
 <% if (mountDirs.length > 0) { -%>
 
-# Pre-create directories for named volume mounts (owned by <%- container.user %> user)
+# Pre-create directories for named volume mounts (owned by dev user)
 RUN mkdir -p \
 <% mountDirs.forEach((dir, i) => { -%>
   <%- dir %><%= i < mountDirs.length - 1 ? ' \\' : '' %>
@@ -158,8 +158,8 @@ ARG FIREWALL_MODE=<%- container.firewall_mode ?? 'restrict' %>
 COPY init-firewall.sh test-firewall.sh /usr/local/bin/
 USER root
 RUN chmod +x /usr/local/bin/init-firewall.sh /usr/local/bin/test-firewall.sh && \
-  echo "<%- container.user %> ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh ${FIREWALL_MODE}, /usr/local/bin/test-firewall.sh, /usr/bin/mkdir -p /run/sshd, /usr/sbin/sshd" > /etc/sudoers.d/<%- container.user %>-firewall && \
-  chmod 0440 /etc/sudoers.d/<%- container.user %>-firewall && \
+  echo "dev ALL=(root) NOPASSWD: /usr/local/bin/init-firewall.sh ${FIREWALL_MODE}, /usr/local/bin/test-firewall.sh, /usr/bin/mkdir -p /run/sshd, /usr/sbin/sshd" > /etc/sudoers.d/dev-firewall && \
+  chmod 0440 /etc/sudoers.d/dev-firewall && \
   echo "${FIREWALL_MODE}" > /etc/firewall-mode && chmod 644 /etc/firewall-mode && \
   touch /var/log/dnsmasq.log && chown nobody:nogroup /var/log/dnsmasq.log
-USER <%- container.user %>
+USER dev

@@ -84,7 +84,6 @@ function nodeTemplate(
   return {
     project: { name: projectName },
     container: {
-      user: "node",
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
       editor: "code",
@@ -129,7 +128,6 @@ function firebaseTemplate(
   return {
     project: { name: projectName },
     container: {
-      user: "node",
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
       editor: "code",
@@ -157,8 +155,8 @@ function firebaseTemplate(
     mounts: [
       { name: "pnpm-store", target: "/workspace/.pnpm-store" },
       ...nodeModuleMounts(importers),
-      { name: "firebase-emulators-cache", target: "/home/node/.cache/firebase/emulators" },
-      { name: "firebase-config", target: "/home/node/.config/configstore" },
+      { name: "firebase-emulators-cache", target: "/home/dev/.cache/firebase/emulators" },
+      { name: "firebase-config", target: "/home/dev/.config/configstore" },
     ],
     container_env: {
       NODE_OPTIONS: "--max-old-space-size=4096 --dns-result-order=ipv4first",
@@ -209,7 +207,6 @@ function railsTemplate(
   return {
     project: { name: projectName },
     container: {
-      user: "dev",
       timezone: "Asia/Tokyo",
       firewall_mode: "restrict",
       editor: "code",

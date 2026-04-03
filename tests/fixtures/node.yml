@@ -2,7 +2,6 @@ project:
   name: my-node-app
 
 container:
-  user: node
   timezone: Asia/Tokyo
   firewall_mode: restrict
 
